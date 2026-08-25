@@ -1,16 +1,30 @@
 import os
-from flask import Flask, jsonify, send_from_directory
+import sys
+from flask import Flask, jsonify
 from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, limiter
+
+print(f"Python version: {sys.version}")
+print(f"Python executable: {sys.executable}")
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     
+    print(f"Database URL: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
+    
     # Initialize extensions
     CORS(app, origins=app.config.get('CORS_ORIGIN', '*'))
-    db.init_app(app)
+    
+    try:
+        db.init_app(app)
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
+        # Continue without database for now
+        pass
+    
     limiter.init_app(app)
     
     # Import routes
@@ -23,8 +37,9 @@ def create_app():
         app.register_blueprint(certificates.bp)
         app.register_blueprint(chat.bp)
         app.register_blueprint(quiz_generate.bp)
+        print("✅ Routes registered successfully")
     except ImportError as e:
-        print(f"Warning: Could not import routes: {e}")
+        print(f"⚠️ Warning: Could not import routes: {e}")
     
     # Error handlers
     @app.errorhandler(404)
@@ -57,6 +72,7 @@ def index():
         'service': 'CyberAware API',
         'version': '1.0.0',
         'status': 'running',
+        'python_version': sys.version,
         'endpoints': {
             'health': '/api/health',
             'modules': '/api/modules',
