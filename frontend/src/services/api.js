@@ -10,9 +10,9 @@ export const api = {
     }
   },
 
-  getModules: async () => {
+  getModules: async (limit = 20, offset = 0) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/modules`);
+      const response = await fetch(`${API_BASE_URL}/api/modules?limit=${limit}&offset=${offset}`);
       return response.json();
     } catch (error) {
       return { success: false, error: { message: 'Network error' } };

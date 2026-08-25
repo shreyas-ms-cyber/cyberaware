@@ -7,23 +7,51 @@ import { MODULES } from '../utils/constants';
 const Learn = () => {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [completed, setCompleted] = useState([]);
   const [scores, setScores] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
+  const [offset, setOffset] = useState(0);
+  const [totalModules, setTotalModules] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [allModulesLoaded, setAllModulesLoaded] = useState(false);
+
+  const PAGE_SIZE = 20; // Load 20 modules at a time
 
   useEffect(() => {
-    fetchModules();
     setCompleted(storage.getCompletedModules());
     setScores(storage.getQuizScores());
+    loadModules(0);
   }, []);
 
-  const fetchModules = async () => {
+  const loadModules = async (offsetValue) => {
     try {
-      const res = await api.getModules();
-      if (res.success) setModules(res.data);
-    } catch (e) { console.error(e) }
-    finally { setLoading(false) }
+      if (offsetValue === 0) setLoading(true);
+      else setLoadingMore(true);
+
+      const res = await api.getModules(PAGE_SIZE, offsetValue);
+      if (res.success) {
+        setModules(prev => offsetValue === 0 ? res.data : [...prev, ...res.data]);
+        setTotalModules(res.total);
+        setHasMore(res.data.length === PAGE_SIZE && res.data.length < res.total);
+        if (res.data.length === 0 || offsetValue + PAGE_SIZE >= res.total) {
+          setAllModulesLoaded(true);
+        }
+        setOffset(offsetValue + PAGE_SIZE);
+      }
+    } catch (e) {
+      console.error('Error fetching modules:', e);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      loadModules(offset);
+    }
   };
 
   const filteredModules = modules.filter(mod => {
@@ -34,13 +62,15 @@ const Learn = () => {
     return matchesSearch;
   });
 
-  if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-      <div className="spinner-border text-accent" role="status">
-        <span className="visually-hidden">Loading...</span>
+  if (loading && modules.length === 0) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <div className="spinner-border text-accent" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div style={{ width: '100%' }}>
@@ -48,7 +78,7 @@ const Learn = () => {
       <div style={{ marginBottom: '16px' }}>
         <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>Learn</h2>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
-          Explore cybersecurity topics
+          Explore cybersecurity topics ({totalModules} modules)
         </p>
       </div>
 
@@ -214,6 +244,45 @@ const Learn = () => {
           );
         })}
       </div>
+
+      {/* Load More Button */}
+      {!allModulesLoaded && filteredModules.length > 0 && (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            style={{
+              padding: '10px 24px',
+              borderRadius: 'var(--radius-md)',
+              background: loadingMore ? 'var(--color-bg-secondary)' : 'var(--color-accent)',
+              color: loadingMore ? 'var(--color-text-muted)' : 'var(--color-bg-primary)',
+              border: 'none',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              cursor: loadingMore ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {loadingMore ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                Loading...
+              </>
+            ) : (
+              'Load More Modules'
+            )}
+          </button>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+            Showing {filteredModules.length} of {totalModules} modules
+          </div>
+        </div>
+      )}
+
+      {allModulesLoaded && filteredModules.length > 0 && (
+        <div style={{ textAlign: 'center', marginTop: '20px', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+          All {totalModules} modules loaded
+        </div>
+      )}
     </div>
   );
 };
