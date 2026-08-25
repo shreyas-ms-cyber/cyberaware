@@ -29,11 +29,9 @@ KEY RULES:
 5. Use real-world examples when helpful
 6. Always explain WHY something is a security risk"""
 
-        # Add module context
         if module_context and module_context != "general":
             system_prompt += f"\n\nCurrent module: {module_context}. Tailor your response to this topic."
 
-        # Build conversation context
         context = ""
         if conversation_history:
             for msg in conversation_history[-5:]:
@@ -146,7 +144,6 @@ Output format (JSON only, no other text):
                 if "candidates" in data and len(data["candidates"]) > 0:
                     content = data["candidates"][0]["content"]["parts"][0]["text"]
                     
-                    # Try to parse JSON
                     try:
                         import re
                         json_match = re.search(r'\{[\s\S]*\}', content)
