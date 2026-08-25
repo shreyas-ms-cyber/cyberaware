@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, limiter
@@ -14,35 +14,66 @@ def create_app():
     
     print(f"Database URL: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
     
-    # Initialize CORS
+    # Initialize extensions
     cors_origin = app.config.get('CORS_ORIGIN', '*')
     CORS(app, origins=cors_origin, supports_credentials=True)
     print(f"CORS configured for: {cors_origin}")
     
-    # Initialize database
-    try:
-        db.init_app(app)
-        with app.app_context():
-            db.create_all()
-            print("✅ Database tables created successfully")
-    except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
-    
+    db.init_app(app)
     limiter.init_app(app)
     
-    # Import models
+    # IMPORTANT: Import ALL models BEFORE create_all()
+    # This ensures they are registered with the same metadata
     from app.models import TrainingModule, QuizQuestion, Scenario, Certificate, ChatAnalytics
+    
+    # Create tables
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created successfully")
+        
+        # Verify tables exist
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        table_names = inspector.get_table_names()
+        print(f"📊 Tables in database: {table_names}")
+        
+        # Check if training_modules exists
+        if 'training_modules' in table_names:
+            print("✅ training_modules table exists")
+            count = TrainingModule.query.count()
+            print(f"📊 training_modules row count: {count}")
+        else:
+            print("❌ training_modules table NOT found!")
+    
+    # Register routes
+    try:
+        from app.routes import health, modules, quizzes, scenarios, certificates, chat, quiz_generate
+        app.register_blueprint(health.bp)
+        app.register_blueprint(modules.bp)
+        app.register_blueprint(quizzes.bp)
+        app.register_blueprint(scenarios.bp)
+        app.register_blueprint(certificates.bp)
+        app.register_blueprint(chat.bp)
+        app.register_blueprint(quiz_generate.bp)
+        print("✅ All routes registered successfully")
+    except ImportError as e:
+        print(f"⚠️ Warning: Could not import routes: {e}")
     
     # Seed endpoint
     @app.route('/api/seed', methods=['GET'])
     def seed_database():
         try:
+            from app.models import TrainingModule, QuizQuestion, Scenario
+            
             # Check if data already exists
-            if TrainingModule.query.count() > 0:
+            existing_count = TrainingModule.query.count()
+            if existing_count > 0:
                 return jsonify({
                     'success': True, 
                     'message': 'Database already seeded',
-                    'count': TrainingModule.query.count()
+                    'existing_modules': existing_count,
+                    'total_quizzes': QuizQuestion.query.count(),
+                    'total_scenarios': Scenario.query.count()
                 })
             
             # Create modules
@@ -62,17 +93,12 @@ def create_app():
                             {
                                 "type": "text",
                                 "title": "Why Password Security Matters",
-                                "body": "Passwords are the first line of defense against unauthorized access. Weak passwords can be cracked in seconds."
-                            },
-                            {
-                                "type": "text",
-                                "title": "Characteristics of Strong Passwords",
-                                "body": "A strong password should be: At least 12 characters long, use a mix of uppercase and lowercase letters, include numbers and special characters."
+                                "body": "Passwords are the first line of defense against unauthorized access."
                             }
                         ],
                         "real_world_example": {
                             "title": "The 2020 Credential Stuffing Attack",
-                            "description": "In 2020, a major attack used passwords stolen from one service to access accounts on other services."
+                            "description": "In 2020, a major attack used passwords stolen from one service."
                         }
                     }
                 },
@@ -80,27 +106,21 @@ def create_app():
                     "title": "Phishing & Social Engineering",
                     "module_order": 2,
                     "content_json": {
-                        "description": "Identify and defend against phishing attacks and social engineering tactics.",
+                        "description": "Identify and defend against phishing attacks.",
                         "learning_objectives": [
                             "Recognize common phishing techniques",
-                            "Identify social engineering red flags",
-                            "Understand how attackers manipulate human psychology"
+                            "Identify social engineering red flags"
                         ],
                         "content": [
                             {
                                 "type": "text",
                                 "title": "What is Phishing?",
-                                "body": "Phishing is a cyber attack where criminals attempt to trick you into revealing sensitive information by posing as legitimate entities."
-                            },
-                            {
-                                "type": "text",
-                                "title": "Common Phishing Techniques",
-                                "body": "Email spoofing, spear phishing, whaling, vishing (voice phishing), and smishing (SMS phishing) are all common techniques."
+                                "body": "Phishing is a cyber attack where criminals attempt to trick you."
                             }
                         ],
                         "real_world_example": {
                             "title": "The 2021 Business Email Compromise",
-                            "description": "A sophisticated phishing campaign targeted executives using deepfake voice technology."
+                            "description": "A sophisticated phishing campaign targeted executives."
                         }
                     }
                 },
@@ -108,73 +128,21 @@ def create_app():
                     "title": "Multi-Factor Authentication",
                     "module_order": 3,
                     "content_json": {
-                        "description": "Understand and implement multi-factor authentication to enhance account security.",
+                        "description": "Understand MFA to enhance account security.",
                         "learning_objectives": [
-                            "Understand what MFA is and why it matters",
-                            "Learn about different MFA factors",
-                            "Implement MFA on key accounts"
+                            "Understand what MFA is",
+                            "Learn about different MFA factors"
                         ],
                         "content": [
                             {
                                 "type": "text",
                                 "title": "What is MFA?",
-                                "body": "Multi-Factor Authentication requires two or more verification factors to access an account."
-                            },
-                            {
-                                "type": "text",
-                                "title": "The Three Factors",
-                                "body": "Something you know (password), something you have (phone/security key), and something you are (biometrics)."
+                                "body": "MFA requires two or more verification factors."
                             }
                         ],
                         "real_world_example": {
                             "title": "The 2022 Cloud Account Breach",
-                            "description": "An organization experienced a breach because MFA was not enabled on critical accounts."
-                        }
-                    }
-                },
-                {
-                    "title": "Email Security",
-                    "module_order": 4,
-                    "content_json": {
-                        "description": "Secure your email communications and protect against email-based threats.",
-                        "learning_objectives": [
-                            "Implement email security best practices",
-                            "Recognize malicious emails",
-                            "Secure email attachments"
-                        ],
-                        "content": [
-                            {
-                                "type": "text",
-                                "title": "Email Security Best Practices",
-                                "body": "Use secure email providers, enable two-factor authentication, be cautious with attachments."
-                            }
-                        ],
-                        "real_world_example": {
-                            "title": "The 2021 Email Spoofing Attack",
-                            "description": "Attackers spoofed a company's email domain to send fake invoices."
-                        }
-                    }
-                },
-                {
-                    "title": "Safe Browsing",
-                    "module_order": 5,
-                    "content_json": {
-                        "description": "Protect yourself while browsing the internet and avoid online threats.",
-                        "learning_objectives": [
-                            "Identify secure websites",
-                            "Protect against browser vulnerabilities",
-                            "Manage browser extensions safely"
-                        ],
-                        "content": [
-                            {
-                                "type": "text",
-                                "title": "Safe Browsing Practices",
-                                "body": "Look for HTTPS in the URL, avoid suspicious websites, keep your browser updated."
-                            }
-                        ],
-                        "real_world_example": {
-                            "title": "The 2022 Malvertising Campaign",
-                            "description": "A major ad network was compromised, delivering malware through legitimate websites."
+                            "description": "An organization experienced a breach because MFA was not enabled."
                         }
                     }
                 }
@@ -190,15 +158,9 @@ def create_app():
                 {"module_id": 1, "question": "What is the minimum recommended length for a strong password?", 
                  "options_json": ["6 characters", "8 characters", "12 characters", "16 characters"], 
                  "correct_answer": "12 characters", "difficulty": "beginner"},
-                {"module_id": 1, "question": "Which of the following is an example of a strong password?", 
-                 "options_json": ["password123", "B3stP@ssw0rd!", "12345678", "qwerty"], 
-                 "correct_answer": "B3stP@ssw0rd!", "difficulty": "beginner"},
                 {"module_id": 2, "question": "What is phishing?", 
-                 "options_json": ["An attack that tricks users into revealing sensitive information", "A type of computer virus", "A hardware failure", "A network configuration error"], 
-                 "correct_answer": "An attack that tricks users into revealing sensitive information", "difficulty": "beginner"},
-                {"module_id": 2, "question": "Which of the following is a red flag for a phishing email?", 
-                 "options_json": ["Spelling and grammar errors", "Your name in the greeting", "A signature with contact information", "Professional formatting"], 
-                 "correct_answer": "Spelling and grammar errors", "difficulty": "beginner"},
+                 "options_json": ["An attack that tricks users", "A type of computer virus", "A hardware failure", "A network error"], 
+                 "correct_answer": "An attack that tricks users", "difficulty": "beginner"},
                 {"module_id": 3, "question": "What does MFA stand for?", 
                  "options_json": ["Multi-Factor Authentication", "Main Frame Access", "Mobile File Access", "Master File Authentication"], 
                  "correct_answer": "Multi-Factor Authentication", "difficulty": "beginner"}
@@ -215,46 +177,31 @@ def create_app():
                     "module_id": 1,
                     "scenario_content": {
                         "title": "Password Reset Scam",
-                        "description": "You receive an email from a service claiming your password has expired. The email includes a link to a website that looks legitimate."
+                        "description": "You receive an email claiming your password has expired."
                     },
                     "options_json": [
                         "Click the link and reset your password",
                         "Ignore the email",
-                        "Go directly to the service's website and reset your password there",
-                        "Forward the email to your friends"
+                        "Go directly to the service's website",
+                        "Forward the email"
                     ],
-                    "correct_answer": "Go directly to the service's website and reset your password there",
-                    "explanation": "This is a phishing attempt. Always navigate to the service's official website directly."
+                    "correct_answer": "Go directly to the service's website",
+                    "explanation": "Always navigate to the official website directly."
                 },
                 {
                     "module_id": 2,
                     "scenario_content": {
                         "title": "Urgent Email from CEO",
-                        "description": "You receive an email from your CEO asking you to send sensitive payroll data immediately."
+                        "description": "You receive an email from your CEO asking for sensitive data."
                     },
                     "options_json": [
-                        "Send the data immediately as requested",
-                        "Reply asking for a document request form",
-                        "Verify the request through a different channel like a phone call",
-                        "Forward the email to all employees"
+                        "Send the data immediately",
+                        "Reply asking for a form",
+                        "Verify through a different channel",
+                        "Forward to all employees"
                     ],
-                    "correct_answer": "Verify the request through a different channel like a phone call",
-                    "explanation": "This is likely a CEO fraud or spear phishing attempt. Always verify sensitive data requests through official channels."
-                },
-                {
-                    "module_id": 3,
-                    "scenario_content": {
-                        "title": "MFA Setup Assistant",
-                        "description": "You receive a call from someone claiming to be from IT support asking for your authentication code."
-                    },
-                    "options_json": [
-                        "Provide your phone number and the code",
-                        "Hang up and contact IT support through the official number",
-                        "Ask them to verify their identity first",
-                        "Provide only your phone number"
-                    ],
-                    "correct_answer": "Hang up and contact IT support through the official number",
-                    "explanation": "This is a social engineering attack. Never share authentication codes over the phone."
+                    "correct_answer": "Verify through a different channel",
+                    "explanation": "Always verify sensitive requests through official channels."
                 }
             ]
             
@@ -278,20 +225,6 @@ def create_app():
                 'error': str(e),
                 'type': type(e).__name__
             }), 500
-    
-    # Register routes
-    try:
-        from app.routes import health, modules, quizzes, scenarios, certificates, chat, quiz_generate
-        app.register_blueprint(health.bp)
-        app.register_blueprint(modules.bp)
-        app.register_blueprint(quizzes.bp)
-        app.register_blueprint(scenarios.bp)
-        app.register_blueprint(certificates.bp)
-        app.register_blueprint(chat.bp)
-        app.register_blueprint(quiz_generate.bp)
-        print("✅ All routes registered successfully")
-    except ImportError as e:
-        print(f"⚠️ Warning: Could not import routes: {e}")
     
     # Error handlers
     @app.errorhandler(404)
@@ -323,9 +256,7 @@ def index():
             'modules': '/api/modules',
             'seed': '/api/seed',
             'quizzes': '/api/quizzes/<module_id>',
-            'scenarios': '/api/scenarios/<module_id>',
-            'chat': '/api/chat',
-            'certificate': '/api/certificate'
+            'scenarios': '/api/scenarios/<module_id>'
         }
     })
 
