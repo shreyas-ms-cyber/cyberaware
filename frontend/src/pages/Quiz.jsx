@@ -1,39 +1,55 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
 import QuizComponent from '../components/quiz/QuizComponent';
 
 const Quiz = () => {
   const { moduleId } = useParams();
-  const navigate = useNavigate();
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [quizScores, setQuizScores] = useState({});
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalModules, setTotalModules] = useState(0);
+
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
-    fetchModules();
+    fetchModules(0);
     setQuizScores(storage.getQuizScores());
   }, []);
 
-  const fetchModules = async () => {
+  const fetchModules = async (offsetValue) => {
     try {
-      const res = await api.getModules();
+      if (offsetValue === 0) setLoading(true);
+      else setLoadingMore(true);
+      
+      const res = await api.getModules(PAGE_SIZE, offsetValue);
       if (res.success) {
-        setModules(res.data);
+        setModules(prev => offsetValue === 0 ? res.data : [...prev, ...res.data]);
+        setTotalModules(res.total || 0);
+        setHasMore(res.data.length === PAGE_SIZE && offsetValue + PAGE_SIZE < res.total);
+        setOffset(offsetValue + PAGE_SIZE);
       }
     } catch (e) {
       console.error('Error fetching modules:', e);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
-  // If no moduleId is provided, show list of modules with quizzes
-  if (!moduleId) {
-    const modulesWithQuizzes = modules.filter(m => m.quiz_count > 0);
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchModules(offset);
+    }
+  };
 
-    if (loading) {
+  // If no moduleId, show list of all modules
+  if (!moduleId) {
+    if (loading && modules.length === 0) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
           <div className="spinner-border text-accent" role="status">
@@ -57,13 +73,13 @@ const Quiz = () => {
             <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>Available Quizzes</h2>
           </div>
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-            Test your knowledge on each module
+            Test your knowledge on {totalModules} modules
           </p>
         </div>
 
-        {/* Quiz Cards */}
+        {/* Quiz Cards - ALL modules */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {modulesWithQuizzes.map((mod) => {
+          {modules.map((mod) => {
             const score = quizScores[mod.id] || null;
             const isCompleted = score !== null;
 
@@ -112,7 +128,7 @@ const Quiz = () => {
                       fontSize: 'var(--text-xs)',
                       color: isCompleted ? 'var(--color-green)' : 'var(--color-text-muted)'
                     }}>
-                      {isCompleted ? `${score}% • Completed` : `${mod.quiz_count} questions • Not attempted`}
+                      {isCompleted ? `${score}% • Completed` : `Quiz available • Not attempted`}
                     </div>
                   </div>
                   <div style={{
@@ -132,28 +148,43 @@ const Quiz = () => {
           })}
         </div>
 
-        {modulesWithQuizzes.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '40px 20px',
-            color: 'var(--color-text-muted)'
-          }}>
-            <i className="fas fa-question-circle" style={{ fontSize: '32px', marginBottom: '12px', display: 'block' }}></i>
-            <p>No quizzes available yet.</p>
-            <p style={{ fontSize: 'var(--text-sm)' }}>Complete training modules to unlock quizzes.</p>
+        {/* Load More */}
+        {hasMore && modules.length > 0 && (
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              style={{
+                padding: '10px 24px',
+                borderRadius: 'var(--radius-md)',
+                background: loadingMore ? 'var(--color-bg-secondary)' : 'var(--color-accent)',
+                color: loadingMore ? 'var(--color-text-muted)' : 'var(--color-bg-primary)',
+                border: 'none',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 600,
+                cursor: loadingMore ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {loadingMore ? 'Loading...' : 'Load More Quizzes'}
+            </button>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+              Showing {modules.length} of {totalModules} quizzes
+            </div>
           </div>
         )}
       </div>
     );
   }
 
-  // Show individual quiz if moduleId is provided
+  // Show individual quiz
   const module = modules.find(m => m.id === parseInt(moduleId));
 
-  if (!module) {
+  if (!module && !loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Loading quiz...</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Module not found</p>
+        <Link to="/quiz" className="btn btn-primary mt-3">Back to Quizzes</Link>
       </div>
     );
   }
@@ -168,7 +199,7 @@ const Quiz = () => {
           marginBottom: '4px'
         }}>
           <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>
-            {module.title}
+            {module?.title || 'Quiz'}
           </h2>
         </div>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
