@@ -1,28 +1,112 @@
+/* ============================================================
+   CYBERAWARE — DESIGN TOKENS
+   Mobile-first responsive system
+   ============================================================ */
+
 :root {
-  --bg-primary: #080D18;
-  --bg-secondary: #0B1120;
-  --bg-surface: #101827;
-  --bg-surface-elevated: #141E30;
-  
-  --accent-primary: #00E5FF;
-  --accent-glow: rgba(0, 229, 255, 0.15);
-  
-  --success: #00D26A;
-  --warning: #FFC857;
-  --danger: #FF3B5C;
-  
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  
-  --border: rgba(255, 255, 255, 0.06);
-  
+  /* ========== BREAKPOINTS ========== */
+  --breakpoint-sm: 320px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+
+  /* ========== COLORS ========== */
+  --color-bg-primary: #070C1A;
+  --color-bg-secondary: #0B1120;
+  --color-bg-surface: #101827;
+  --color-bg-surface-elevated: #182035;
+  --color-bg-card: #0F1628;
+  --color-bg-card-hover: #1A2440;
+
+  --color-accent: #00E5FF;
+  --color-accent-hover: #00C4D4;
+  --color-accent-soft: rgba(0, 229, 255, 0.08);
+  --color-accent-glow: rgba(0, 229, 255, 0.12);
+
+  --color-purple: #7B61FF;
+  --color-purple-soft: rgba(123, 97, 255, 0.12);
+
+  --color-green: #00D26A;
+  --color-green-soft: rgba(0, 210, 106, 0.12);
+
+  --color-amber: #FFC857;
+  --color-amber-soft: rgba(255, 200, 87, 0.12);
+
+  --color-orange: #FF8A4C;
+  --color-orange-soft: rgba(255, 138, 76, 0.12);
+
+  --color-red: #FF3B5C;
+  --color-red-soft: rgba(255, 59, 92, 0.12);
+
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #4A5A7A;
+
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-light: rgba(255, 255, 255, 0.03);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+
+  /* ========== SPACING (8px scale) ========== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  /* ========== RADIUS ========== */
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 12px;
   --radius-lg: 16px;
-  
-  --font-heading: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  
-  --transition-fast: 150ms ease;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* ========== TYPOGRAPHY ========== */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-heading: 'Poppins', var(--font-family);
+
+  /* Mobile-first font sizes */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+  --text-3xl: 26px;
+  --text-4xl: 32px;
+
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 60px rgba(0, 229, 255, 0.04);
+
+  /* ========== LAYOUT ========== */
+  --header-height: 56px;
+  --nav-height: 64px;
+  --sidebar-width: 260px;
+
+  /* ========== TRANSITIONS ========== */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+}
+
+/* ========== DESKTOP OVERRIDES ========== */
+@media (min-width: 1024px) {
+  :root {
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 15px;
+    --text-lg: 17px;
+    --text-xl: 20px;
+    --text-2xl: 26px;
+    --text-3xl: 32px;
+    --text-4xl: 40px;
+    --header-height: 72px;
+  }
 }

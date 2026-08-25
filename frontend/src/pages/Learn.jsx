@@ -10,6 +10,7 @@ const Learn = () => {
   const [completed, setCompleted] = useState([]);
   const [scores, setScores] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchModules();
@@ -25,86 +26,188 @@ const Learn = () => {
     finally { setLoading(false) }
   };
 
-  const filteredModules = modules.filter(mod =>
-    mod.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredModules = modules.filter(mod => {
+    const matchesSearch = mod.title.toLowerCase().includes(searchTerm.toLowerCase());
+    if (filter === 'all') return matchesSearch;
+    if (filter === 'completed') return matchesSearch && completed.includes(mod.id);
+    if (filter === 'in-progress') return matchesSearch && !completed.includes(mod.id) && scores[mod.id] !== undefined;
+    return matchesSearch;
+  });
+
+  if (loading) return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+      <div className="spinner-border text-accent" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
   );
 
-  if (loading) return <div className="text-center py-5">Loading...</div>;
-
   return (
-    <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Training Modules</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Complete all modules to earn your certificate</p>
-        <div style={{ marginTop: '12px', position: 'relative' }}>
-          <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input
-            type="text"
-            placeholder="Search modules..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 12px 10px 40px',
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-              fontSize: '14px',
-              outline: 'none'
-            }}
-          />
-        </div>
+    <div style={{ width: '100%' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '16px' }}>
+        <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>Learn</h2>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
+          Explore cybersecurity topics
+        </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: '12px' }}>
+        <i className="fas fa-search" style={{
+          position: 'absolute',
+          left: '12px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: 'var(--color-text-muted)',
+          fontSize: '14px'
+        }} />
+        <input
+          type="text"
+          placeholder="Search modules..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px 10px 38px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-bg-card)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-text-primary)',
+            fontSize: 'var(--text-sm)',
+            outline: 'none',
+            transition: 'border-color 0.2s ease'
+          }}
+        />
+      </div>
+
+      {/* Filters */}
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        marginBottom: '16px',
+        overflowX: 'auto',
+        paddingBottom: '4px'
+      }}>
+        {['all', 'in-progress', 'completed'].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            style={{
+              padding: '6px 16px',
+              borderRadius: 'var(--radius-full)',
+              background: filter === f ? 'var(--color-accent)' : 'var(--color-bg-card)',
+              color: filter === f ? 'var(--color-bg-primary)' : 'var(--color-text-secondary)',
+              border: filter === f ? 'none' : '1px solid var(--color-border)',
+              fontSize: 'var(--text-xs)',
+              fontWeight: filter === f ? 600 : 400,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {f === 'all' ? 'All' : f === 'in-progress' ? 'In Progress' : 'Completed'}
+          </button>
+        ))}
+      </div>
+
+      {/* Module Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {filteredModules.map(mod => {
           const isCompleted = completed.includes(mod.id);
           const score = scores[mod.id] || null;
           const modIcon = MODULES.find(m => m.id === mod.id)?.icon || 'fa-book';
+          const progress = isCompleted ? 100 : (score !== null ? score : 0);
+
           return (
             <Link key={mod.id} to={`/module/${mod.id}`} style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'var(--bg-surface)',
-                borderRadius: 'var(--radius-md)',
-                padding: '16px',
-                border: `1px solid ${isCompleted ? 'rgba(0,210,106,0.3)' : 'var(--border)'}`,
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-                height: '100%',
                 display: 'flex',
-                flexDirection: 'column'
+                alignItems: 'center',
+                gap: '12px',
+                padding: '14px 16px',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--color-bg-card)',
+                border: `1px solid ${isCompleted ? 'rgba(0, 210, 106, 0.2)' : 'var(--color-border)'}`,
+                transition: 'all 0.2s ease',
+                cursor: 'pointer'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(0, 229, 255, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'var(--accent)',
-                      fontSize: '18px'
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: 'var(--radius-md)',
+                  background: isCompleted ? 'rgba(0, 210, 106, 0.12)' : 'var(--color-accent-soft)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isCompleted ? 'var(--color-green)' : 'var(--color-accent)',
+                  fontSize: '16px',
+                  flexShrink: 0
+                }}>
+                  <i className={`fas ${modIcon}`}></i>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <h5 style={{
+                      fontSize: 'var(--text-sm)',
+                      fontWeight: 600,
+                      margin: 0,
+                      color: 'var(--color-text-primary)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
                     }}>
-                      <i className={`fas ${modIcon}`}></i>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Module {mod.module_order}</div>
-                      <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{mod.title}</h4>
-                    </div>
+                      {mod.title}
+                    </h5>
+                    <i className="fas fa-chevron-right" style={{
+                      fontSize: '12px',
+                      color: 'var(--color-text-muted)',
+                      flexShrink: 0
+                    }} />
                   </div>
-                  {isCompleted && <i className="fas fa-check-circle" style={{ color: 'var(--success)' }}></i>}
-                </div>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', flex: 1 }}>{mod.content?.description || ''}</p>
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {score !== null && <span style={{ fontSize: '11px', background: 'rgba(0,229,255,0.1)', color: 'var(--accent)', padding: '2px 10px', borderRadius: '12px' }}>{score}%</span>}
-                  {mod.quiz_count > 0 && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}><i className="fas fa-question-circle"></i> {mod.quiz_count}</span>}
-                  {mod.scenario_count > 0 && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}><i className="fas fa-shield-alt"></i> {mod.scenario_count}</span>}
-                </div>
-                <div style={{ marginTop: '12px', height: '3px', background: 'var(--bg-secondary)', borderRadius: '2px', overflow: 'hidden' }}>
-                  <div style={{ width: isCompleted ? '100%' : '0%', height: '100%', background: 'var(--accent)', transition: 'width 0.5s' }} />
+                  <p style={{
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--color-text-muted)',
+                    margin: '2px 0 6px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {mod.content?.description || 'Learn cybersecurity best practices'}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      flex: 1,
+                      height: '3px',
+                      background: 'var(--color-bg-secondary)',
+                      borderRadius: '2px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${progress}%`,
+                        height: '100%',
+                        background: isCompleted ? 'var(--color-green)' : (progress > 0 ? 'var(--color-accent)' : 'var(--color-text-muted)'),
+                        borderRadius: '2px',
+                        transition: 'width 0.5s ease'
+                      }} />
+                    </div>
+                    <span style={{
+                      fontSize: 'var(--text-xs)',
+                      fontWeight: 600,
+                      color: isCompleted ? 'var(--color-green)' : (progress > 0 ? 'var(--color-accent)' : 'var(--color-text-muted)')
+                    }}>
+                      {isCompleted ? '✓' : `${Math.round(progress)}%`}
+                    </span>
+                  </div>
                 </div>
               </div>
             </Link>

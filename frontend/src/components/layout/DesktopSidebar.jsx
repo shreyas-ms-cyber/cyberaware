@@ -24,8 +24,8 @@ const DesktopSidebar = () => {
   return (
     <aside style={{
       width: 'var(--sidebar-width)',
-      background: 'var(--bg-secondary)',
-      borderRight: '1px solid var(--border)',
+      background: 'var(--color-bg-secondary)',
+      borderRight: '1px solid var(--color-border)',
       height: '100vh',
       position: 'fixed',
       top: 0,
@@ -41,8 +41,8 @@ const DesktopSidebar = () => {
         <div style={{
           fontSize: '24px',
           fontWeight: 800,
-          color: 'var(--accent)',
-          fontFamily: 'var(--font-heading)',
+          color: 'var(--color-accent)',
+          fontFamily: 'var(--font-family-heading)',
           display: 'flex',
           alignItems: 'center',
           gap: '8px'
@@ -50,14 +50,14 @@ const DesktopSidebar = () => {
           <span>CyberAware</span>
           <span style={{
             fontSize: '10px',
-            color: 'var(--text-muted)',
-            background: 'var(--bg-surface)',
+            color: 'var(--color-text-muted)',
+            background: 'var(--color-bg-surface)',
             padding: '2px 8px',
             borderRadius: '4px',
-            border: '1px solid var(--border)'
+            border: '1px solid var(--color-border)'
           }}>v1.0</span>
         </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px' }}>
           Stay Aware. Stay Secure.
         </div>
       </div>
@@ -76,8 +76,8 @@ const DesktopSidebar = () => {
                 gap: '14px',
                 padding: '10px 14px',
                 borderRadius: 'var(--radius-md)',
-                color: active ? 'var(--accent)' : 'var(--text-secondary)',
-                background: active ? 'rgba(0, 229, 255, 0.08)' : 'transparent',
+                color: active ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                background: active ? 'var(--color-accent-soft)' : 'transparent',
                 textDecoration: 'none',
                 transition: 'all 0.2s ease',
                 marginBottom: '2px',
@@ -91,8 +91,8 @@ const DesktopSidebar = () => {
                 <span style={{
                   marginLeft: 'auto',
                   fontSize: '9px',
-                  background: 'var(--accent)',
-                  color: 'var(--bg-primary)',
+                  background: 'var(--color-accent)',
+                  color: 'var(--color-bg-primary)',
                   padding: '2px 8px',
                   borderRadius: '12px',
                   fontWeight: 700
@@ -106,7 +106,7 @@ const DesktopSidebar = () => {
                   transform: 'translateY(-50%)',
                   width: '3px',
                   height: '24px',
-                  background: 'var(--accent)',
+                  background: 'var(--color-accent)',
                   borderRadius: '2px'
                 }} />
               )}
@@ -115,10 +115,10 @@ const DesktopSidebar = () => {
         })}
       </nav>
 
-      {/* Bottom Section - CyberBuddy + Tip */}
-      <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+      {/* Bottom Section */}
+      <div style={{ marginTop: 'auto', borderTop: '1px solid var(--color-border)', paddingTop: '16px' }}>
         <div style={{
-          background: 'var(--bg-surface)',
+          background: 'var(--color-bg-surface)',
           borderRadius: 'var(--radius-md)',
           padding: '16px',
           marginBottom: '12px',
@@ -127,20 +127,20 @@ const DesktopSidebar = () => {
           gap: '12px'
         }}>
           <CyberBuddyAvatar size="sm" />
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <strong style={{ color: 'var(--text-primary)' }}>CyberBuddy AI</strong>
-            <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+            <strong style={{ color: 'var(--color-text-primary)' }}>CyberBuddy AI</strong>
+            <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--color-text-muted)' }}>
               Your security assistant
             </p>
           </div>
         </div>
         <div style={{
           fontSize: '11px',
-          color: 'var(--text-muted)',
+          color: 'var(--color-text-muted)',
           padding: '0 8px',
           lineHeight: 1.5
         }}>
-          <i className="fas fa-lightbulb" style={{ color: 'var(--warning)', marginRight: '6px' }}></i>
+          <i className="fas fa-lightbulb" style={{ color: 'var(--color-amber)', marginRight: '6px' }}></i>
           Tip: Enable MFA on all accounts
         </div>
       </div>

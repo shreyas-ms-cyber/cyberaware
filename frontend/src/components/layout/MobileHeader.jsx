@@ -8,23 +8,25 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
       height: 'var(--header-height)',
       background: 'rgba(8, 13, 24, 0.95)',
       backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid var(--border)',
+      borderBottom: '1px solid var(--color-border)',
       padding: '0 16px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       position: 'sticky',
       top: 0,
-      zIndex: 50
+      zIndex: 50,
+      width: '100%',
+      flexShrink: 0
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         {showBack && (
           <button
             onClick={() => navigate(-1)}
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--text-primary)',
+              color: 'var(--color-text-primary)',
               fontSize: '18px',
               padding: '4px',
               cursor: 'pointer',
@@ -39,20 +41,34 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
             <i className="fas fa-chevron-left"></i>
           </button>
         )}
-        <span style={{
-          fontSize: '18px',
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          fontFamily: 'var(--font-heading)'
-        }}>
-          {title}
-        </span>
+        <div style={{ minWidth: 0 }}>
+          <div style={{
+            fontSize: '17px',
+            fontWeight: 700,
+            color: 'var(--color-accent)',
+            fontFamily: 'var(--font-family-heading)',
+            lineHeight: 1.2
+          }}>
+            {title === 'CyberAware' ? 'CyberAware' : title}
+          </div>
+          {title === 'CyberAware' && (
+            <div style={{
+              fontSize: '9px',
+              color: 'var(--color-text-muted)',
+              lineHeight: 1.2,
+              marginTop: -2
+            }}>
+              Stay Aware. Stay Secure.
+            </div>
+          )}
+        </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <button style={{
           background: 'none',
           border: 'none',
-          color: 'var(--text-secondary)',
+          color: 'var(--color-text-secondary)',
           fontSize: '18px',
           padding: '8px',
           cursor: 'pointer',

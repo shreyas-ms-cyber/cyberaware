@@ -51,12 +51,12 @@ const MobileBottomNav = () => {
       right: 0,
       background: 'rgba(8, 13, 24, 0.98)',
       backdropFilter: 'blur(12px)',
-      borderTop: '1px solid var(--border)',
-      height: 'var(--mobile-nav-height)',
+      borderTop: '1px solid var(--color-border)',
+      height: 'var(--nav-height)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-around',
-      padding: '0 8px',
+      padding: '0 4px',
       paddingBottom: 'env(safe-area-inset-bottom)',
       zIndex: 100
     }} ref={moreRef}>
@@ -76,19 +76,19 @@ const MobileBottomNav = () => {
               alignItems: 'center',
               justifyContent: 'center',
               textDecoration: 'none',
-              color: active ? 'var(--accent)' : 'var(--text-secondary)',
-              fontSize: '10px',
-              padding: '4px 12px',
-              minWidth: '56px',
+              color: active ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              fontSize: '9px',
+              padding: '4px 8px',
+              minWidth: '48px',
               minHeight: '56px',
               borderRadius: 'var(--radius-sm)',
-              background: active ? 'rgba(0, 229, 255, 0.08)' : 'transparent',
+              background: active ? 'var(--color-accent-soft)' : 'transparent',
               transition: 'all 0.2s ease',
               position: 'relative'
             }}
           >
             <i className={`fas ${item.icon}`} style={{ fontSize: '20px', marginBottom: '2px' }}></i>
-            <span>{item.label}</span>
+            <span style={{ fontSize: '9px', fontWeight: active ? 600 : 400 }}>{item.label}</span>
             {active && (
               <span style={{
                 position: 'absolute',
@@ -97,7 +97,7 @@ const MobileBottomNav = () => {
                 transform: 'translateX(-50%)',
                 width: '20px',
                 height: '3px',
-                background: 'var(--accent)',
+                background: 'var(--color-accent)',
                 borderRadius: '2px'
               }} />
             )}
@@ -111,10 +111,10 @@ const MobileBottomNav = () => {
           bottom: 'calc(100% + 4px)',
           left: '8px',
           right: '8px',
-          background: 'var(--bg-surface)',
+          background: 'var(--color-bg-surface)',
           borderRadius: 'var(--radius-lg)',
           padding: '8px',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--color-border)',
           boxShadow: 'var(--shadow-lg)',
           display: 'flex',
           flexWrap: 'wrap',
@@ -134,10 +134,10 @@ const MobileBottomNav = () => {
                   alignItems: 'center',
                   padding: '8px 12px',
                   borderRadius: 'var(--radius-sm)',
-                  background: active ? 'rgba(0, 229, 255, 0.08)' : 'transparent',
-                  color: active ? 'var(--accent)' : 'var(--text-secondary)',
+                  background: active ? 'var(--color-accent-soft)' : 'transparent',
+                  color: active ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                   textDecoration: 'none',
-                  fontSize: '10px',
+                  fontSize: '9px',
                   minWidth: '56px',
                   transition: 'all 0.2s ease'
                 }}
