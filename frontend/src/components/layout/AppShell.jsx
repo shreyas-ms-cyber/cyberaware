@@ -37,7 +37,10 @@ const AppShell = ({ children }) => {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      background: 'var(--color-bg-primary)'
+      background: 'var(--color-bg-primary)',
+      width: '100%',
+      maxWidth: '100%',
+      overflowX: 'hidden'
     }}>
       {!isMobile && <DesktopSidebar />}
 
@@ -49,26 +52,35 @@ const AppShell = ({ children }) => {
         minHeight: '100vh',
         width: '100%',
         maxWidth: '100%',
-        overflowX: 'hidden'
+        overflowX: 'hidden',
+        position: 'relative'
       }}>
         {isMobile && <MobileHeader showBack={showBack} title={getPageTitle(location.pathname)} />}
 
         <main style={{
           flex: 1,
-          padding: isMobile ? '16px 16px 80px' : '24px 32px 32px',
+          padding: isMobile ? '16px 16px 100px' : '24px 32px 32px',
           width: '100%',
           maxWidth: isMobile ? '100%' : '1200px',
           margin: '0 auto',
-          overflowX: 'hidden'
+          overflowX: 'hidden',
+          position: 'relative',
+          background: 'var(--color-bg-primary)'
         }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 1 }}
               transition={{ duration: 0.2 }}
-              style={{ width: '100%', maxWidth: '100%' }}
+              style={{
+                width: '100%',
+                maxWidth: '100%',
+                opacity: 1,
+                position: 'relative',
+                zIndex: 1
+              }}
             >
               {children}
             </motion.div>

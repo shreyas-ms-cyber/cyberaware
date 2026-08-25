@@ -6,8 +6,7 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
   return (
     <header style={{
       height: 'var(--header-height)',
-      background: 'rgba(8, 13, 24, 0.95)',
-      backdropFilter: 'blur(12px)',
+      background: '#070D1A',
       borderBottom: '1px solid var(--color-border)',
       padding: '0 16px',
       display: 'flex',
@@ -17,7 +16,8 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
       top: 0,
       zIndex: 50,
       width: '100%',
-      flexShrink: 0
+      flexShrink: 0,
+      minHeight: '64px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         {showBack && (
@@ -34,7 +34,8 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
               alignItems: 'center',
               minWidth: '44px',
               minHeight: '44px',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              borderRadius: 'var(--radius-sm)'
             }}
             aria-label="Go back"
           >
@@ -45,11 +46,11 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
           <div style={{
             fontSize: '17px',
             fontWeight: 700,
-            color: 'var(--color-accent)',
+            color: 'var(--color-text-primary)',
             fontFamily: 'var(--font-family-heading)',
             lineHeight: 1.2
           }}>
-            {title === 'CyberAware' ? 'CyberAware' : title}
+            {title}
           </div>
           {title === 'CyberAware' && (
             <div style={{
@@ -76,7 +77,8 @@ const MobileHeader = ({ showBack = false, title = 'CyberAware' }) => {
           minHeight: '44px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          borderRadius: 'var(--radius-sm)'
         }}>
           <i className="fas fa-bell"></i>
         </button>

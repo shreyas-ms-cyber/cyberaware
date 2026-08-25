@@ -1,9 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800&display=swap');
 @import './design-tokens.css';
 
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
 *,
 *::before,
 *::after {
@@ -36,33 +33,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-text-muted);
-  border-radius: 2px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--color-text-muted); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
 
-/* ============================================================
-   TYPOGRAPHY
-   ============================================================ */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-heading);
   color: var(--color-text-primary);
   font-weight: 700;
@@ -70,177 +48,55 @@ h6 {
   letter-spacing: -0.02em;
 }
 
-h1 {
-  font-size: var(--text-3xl);
-}
-h2 {
-  font-size: var(--text-2xl);
-}
-h3 {
-  font-size: var(--text-xl);
-}
-h4 {
-  font-size: var(--text-lg);
-}
-h5 {
-  font-size: var(--text-base);
-}
-h6 {
-  font-size: var(--text-sm);
-}
+/* Utility Classes */
+.text-accent { color: var(--color-accent); }
+.text-green { color: var(--color-green); }
+.text-amber { color: var(--color-amber); }
+.text-purple { color: var(--color-purple); }
+.text-orange { color: var(--color-orange); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
 
-/* ============================================================
-   UTILITY CLASSES
-   ============================================================ */
-.text-accent {
-  color: var(--color-accent);
-}
-.text-green {
-  color: var(--color-green);
-}
-.text-amber {
-  color: var(--color-amber);
-}
-.text-purple {
-  color: var(--color-purple);
-}
-.text-orange {
-  color: var(--color-orange);
-}
-.text-red {
-  color: var(--color-red);
-}
-.text-secondary {
-  color: var(--color-text-secondary);
-}
-.text-muted {
-  color: var(--color-text-muted);
-}
+.bg-surface { background: var(--color-bg-surface); }
+.bg-surface-elevated { background: var(--color-bg-surface-elevated); }
+.bg-card { background: var(--color-bg-card); }
 
-.bg-surface {
-  background: var(--color-bg-surface);
-}
-.bg-surface-elevated {
-  background: var(--color-bg-surface-elevated);
-}
-.bg-card {
-  background: var(--color-bg-card);
-}
-.bg-primary {
-  background: var(--color-bg-primary);
-}
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-full { border-radius: var(--radius-full); }
 
-.rounded-sm {
-  border-radius: var(--radius-sm);
-}
-.rounded-md {
-  border-radius: var(--radius-md);
-}
-.rounded-lg {
-  border-radius: var(--radius-lg);
-}
-.rounded-xl {
-  border-radius: var(--radius-xl);
-}
-.rounded-full {
-  border-radius: var(--radius-full);
-}
-
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
+/* Animations */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulseGlow {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
-  }
+.fade-in-up { animation: fadeInUp 0.3s ease forwards; }
+.fade-in { animation: fadeIn 0.25s ease forwards; }
+
+/* Safe Area Support */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-top { padding-top: env(safe-area-inset-top); }
 }
 
-@keyframes breatheGlow {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.08);
-  }
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.3s ease forwards;
-}
-.fade-in {
-  animation: fadeIn 0.25s ease forwards;
-}
-.slide-up {
-  animation: slideUp 0.3s ease forwards;
-}
-
-/* ============================================================
-   RESPONSIVE HELPERS
-   ============================================================ */
-.mobile-only {
-  display: block;
-}
-.desktop-only {
-  display: none;
-}
+/* Mobile/Desktop Visibility */
+.mobile-only { display: block; }
+.desktop-only { display: none; }
 
 @media (min-width: 1024px) {
-  .mobile-only {
-    display: none;
-  }
-  .desktop-only {
-    display: block;
-  }
-}
-
-/* ============================================================
-   SAFE AREA SUPPORT
-   ============================================================ */
-@supports (padding: env(safe-area-inset-bottom)) {
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
+  .mobile-only { display: none; }
+  .desktop-only { display: block; }
 }

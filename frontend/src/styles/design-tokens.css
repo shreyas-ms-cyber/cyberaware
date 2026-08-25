@@ -1,8 +1,3 @@
-/* ============================================================
-   CYBERAWARE — DESIGN TOKENS
-   Mobile-first responsive system
-   ============================================================ */
-
 :root {
   /* ========== BREAKPOINTS ========== */
   --breakpoint-sm: 320px;
@@ -11,42 +6,41 @@
   --breakpoint-xl: 1440px;
 
   /* ========== COLORS ========== */
-  --color-bg-primary: #070C1A;
-  --color-bg-secondary: #0B1120;
-  --color-bg-surface: #101827;
-  --color-bg-surface-elevated: #182035;
-  --color-bg-card: #0F1628;
-  --color-bg-card-hover: #1A2440;
+  --color-bg-primary: #050B18;
+  --color-bg-secondary: #0A1428;
+  --color-bg-surface: #0D1627;
+  --color-bg-surface-elevated: #111C2E;
+  --color-bg-card: #0E1829;
 
-  --color-accent: #00E5FF;
-  --color-accent-hover: #00C4D4;
-  --color-accent-soft: rgba(0, 229, 255, 0.08);
-  --color-accent-glow: rgba(0, 229, 255, 0.12);
+  --color-accent: #00D9FF;
+  --color-accent-hover: #00B8D4;
+  --color-accent-soft: rgba(0, 217, 255, 0.08);
+  --color-accent-glow: rgba(0, 217, 255, 0.12);
 
-  --color-purple: #7B61FF;
-  --color-purple-soft: rgba(123, 97, 255, 0.12);
+  --color-purple: #7C3AED;
+  --color-purple-soft: rgba(124, 58, 237, 0.12);
 
-  --color-green: #00D26A;
-  --color-green-soft: rgba(0, 210, 106, 0.12);
+  --color-green: #22C55E;
+  --color-green-soft: rgba(34, 197, 94, 0.12);
 
-  --color-amber: #FFC857;
-  --color-amber-soft: rgba(255, 200, 87, 0.12);
+  --color-amber: #FBBF24;
+  --color-amber-soft: rgba(251, 191, 36, 0.12);
 
-  --color-orange: #FF8A4C;
-  --color-orange-soft: rgba(255, 138, 76, 0.12);
+  --color-orange: #F97316;
+  --color-orange-soft: rgba(249, 115, 22, 0.12);
 
-  --color-red: #FF3B5C;
-  --color-red-soft: rgba(255, 59, 92, 0.12);
+  --color-red: #EF4444;
+  --color-red-soft: rgba(239, 68, 68, 0.12);
 
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #94A3B8;
-  --color-text-muted: #4A5A7A;
+  --color-text-muted: #64748B;
 
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-light: rgba(255, 255, 255, 0.03);
-  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-border: rgba(148, 163, 184, 0.12);
+  --color-border-light: rgba(148, 163, 184, 0.06);
+  --color-border-strong: rgba(148, 163, 184, 0.20);
 
-  /* ========== SPACING (8px scale) ========== */
+  /* ========== SPACING ========== */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -60,7 +54,7 @@
 
   /* ========== RADIUS ========== */
   --radius-sm: 6px;
-  --radius-md: 12px;
+  --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
@@ -69,7 +63,6 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-heading: 'Poppins', var(--font-family);
 
-  /* Mobile-first font sizes */
   --text-xs: 11px;
   --text-sm: 13px;
   --text-base: 14px;
@@ -82,12 +75,12 @@
   /* ========== SHADOWS ========== */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 60px rgba(0, 229, 255, 0.04);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
 
   /* ========== LAYOUT ========== */
-  --header-height: 56px;
-  --nav-height: 64px;
+  --header-height: 64px;
+  --nav-height: 72px;
   --sidebar-width: 260px;
 
   /* ========== TRANSITIONS ========== */
@@ -96,7 +89,6 @@
   --transition-slow: 0.4s ease;
 }
 
-/* ========== DESKTOP OVERRIDES ========== */
 @media (min-width: 1024px) {
   :root {
     --text-xs: 12px;

@@ -7,175 +7,184 @@ import QuizComponent from '../components/quiz/QuizComponent';
 const Quiz = () => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
-  const [module, setModule] = useState(null);
+  const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizScore, setQuizScore] = useState(null);
+  const [quizScores, setQuizScores] = useState({});
 
   useEffect(() => {
-    if (moduleId) {
-      fetchModule();
-      const quizScores = storage.getQuizScores();
-      if (quizScores[moduleId]) {
-        setQuizCompleted(true);
-        setQuizScore(quizScores[moduleId]);
-      }
-    }
-  }, [moduleId]);
+    fetchModules();
+    setQuizScores(storage.getQuizScores());
+  }, []);
 
-  const fetchModule = async () => {
+  const fetchModules = async () => {
     try {
-      setLoading(true);
-      const response = await api.getModule(moduleId);
-      if (response.success) {
-        setModule(response.data);
+      const res = await api.getModules();
+      if (res.success) {
+        setModules(res.data);
       }
-    } catch (error) {
-      console.error('Error fetching module:', error);
+    } catch (e) {
+      console.error('Error fetching modules:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuizComplete = (score) => {
-    setQuizCompleted(true);
-    setQuizScore(score);
-    storage.saveQuizScore(parseInt(moduleId), score);
-    storage.addActivity({
-      type: 'quiz_completed',
-      moduleId: parseInt(moduleId),
-      moduleTitle: module?.title,
-      score: score
-    });
-  };
-
-  // If no moduleId is provided, show a list of available quizzes
+  // If no moduleId is provided, show list of modules with quizzes
   if (!moduleId) {
-    return (
-      <div className="container py-4">
-        <h2 className="mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
-          <i className="fas fa-question-circle me-2" style={{ color: 'var(--accent)' }}></i>
-          Available Quizzes
-        </h2>
-        <div className="row g-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((id) => {
-            const quizScores = storage.getQuizScores();
-            const score = quizScores[id];
-            const completed = storage.getCompletedModules().includes(id);
-            
-            return (
-              <div className="col-md-6 col-lg-4" key={id}>
-                <Link 
-                  to={`/quiz/${id}`} 
-                  className="text-decoration-none"
-                  style={{ display: 'block' }}
-                >
-                  <div className="card h-100 border-0 rounded-lg" style={{
-                    background: 'var(--surface)',
-                    border: `1px solid ${score ? 'rgba(0, 210, 106, 0.3)' : 'var(--border)'}`,
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}>
-                    <div className="card-body p-4 text-center">
-                      <div style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '50%',
-                        background: 'rgba(0, 229, 255, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 1rem',
-                        color: 'var(--accent)',
-                        fontSize: '1.5rem'
-                      }}>
-                        <i className="fas fa-book"></i>
-                      </div>
-                      <h5 style={{ color: 'var(--text-primary)' }}>Module {id}</h5>
-                      <p className="text-secondary" style={{ fontSize: '0.9rem' }}>
-                        {score ? (
-                          <>
-                            <span style={{ color: score >= 70 ? 'var(--success)' : 'var(--warning)' }}>
-                              {score}%
-                            </span>
-                            <span className="ms-2 text-secondary">• Completed</span>
-                          </>
-                        ) : (
-                          'Not attempted'
-                        )}
-                      </p>
-                      <button 
-                        className="btn btn-sm px-4"
-                        style={{
-                          background: score ? 'var(--success)' : 'var(--accent)',
-                          color: 'var(--bg-primary)',
-                          border: 'none',
-                          fontWeight: 600
-                        }}
-                      >
-                        {score ? 'Retake Quiz' : 'Start Quiz'}
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-        <div className="text-center mt-4">
-          <Link to="/learn" className="btn btn-outline-secondary">
-            <i className="fas fa-arrow-left me-2"></i>
-            Back to Modules
-          </Link>
-        </div>
-      </div>
-    );
-  }
+    const modulesWithQuizzes = modules.filter(m => m.quiz_count > 0);
 
-  if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center py-5">
+    if (loading) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
           <div className="spinner-border text-accent" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
+      );
+    }
+
+    return (
+      <div style={{ width: '100%', maxWidth: '100%' }}>
+        {/* Header */}
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '4px'
+          }}>
+            <i className="fas fa-question-circle" style={{ color: 'var(--color-accent)', fontSize: '20px' }}></i>
+            <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>Available Quizzes</h2>
+          </div>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+            Test your knowledge on each module
+          </p>
+        </div>
+
+        {/* Quiz Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {modulesWithQuizzes.map((mod) => {
+            const score = quizScores[mod.id] || null;
+            const isCompleted = score !== null;
+
+            return (
+              <Link
+                key={mod.id}
+                to={`/quiz/${mod.id}`}
+                style={{ textDecoration: 'none' }}
+              >
+                <div style={{
+                  background: 'linear-gradient(145deg, rgba(15,27,47,0.96), rgba(10,20,36,0.96))',
+                  border: `1px solid ${isCompleted ? 'rgba(34, 197, 94, 0.3)' : 'var(--color-border)'}`,
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '18px',
+                  boxShadow: 'var(--shadow-card)',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px'
+                }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: 'var(--radius-md)',
+                    background: isCompleted ? 'rgba(34, 197, 94, 0.12)' : 'var(--color-accent-soft)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isCompleted ? 'var(--color-green)' : 'var(--color-accent)',
+                    fontSize: '18px',
+                    flexShrink: 0
+                  }}>
+                    <i className={`fas ${isCompleted ? 'fa-check-circle' : 'fa-book'}`}></i>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: 'var(--text-base)',
+                      fontWeight: 600,
+                      color: 'var(--color-text-primary)',
+                      marginBottom: '2px'
+                    }}>
+                      {mod.title}
+                    </div>
+                    <div style={{
+                      fontSize: 'var(--text-xs)',
+                      color: isCompleted ? 'var(--color-green)' : 'var(--color-text-muted)'
+                    }}>
+                      {isCompleted ? `${score}% • Completed` : `${mod.quiz_count} questions • Not attempted`}
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-full)',
+                    background: isCompleted ? 'var(--color-green)' : 'var(--color-accent)',
+                    color: 'var(--color-bg-primary)',
+                    fontSize: 'var(--text-xs)',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {isCompleted ? 'Retake →' : 'Start →'}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {modulesWithQuizzes.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            color: 'var(--color-text-muted)'
+          }}>
+            <i className="fas fa-question-circle" style={{ fontSize: '32px', marginBottom: '12px', display: 'block' }}></i>
+            <p>No quizzes available yet.</p>
+            <p style={{ fontSize: 'var(--text-sm)' }}>Complete training modules to unlock quizzes.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Show individual quiz if moduleId is provided
+  const module = modules.find(m => m.id === parseInt(moduleId));
+
+  if (!module) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Loading quiz...</p>
       </div>
     );
   }
 
   return (
-    <div className="container py-4">
-      <div className="mb-4">
-        <div className="d-flex align-items-center gap-3">
-          <Link to="/learn" className="text-decoration-none text-secondary">
-            <i className="fas fa-arrow-left"></i>
-          </Link>
-          <div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Module {module?.module_order || moduleId}
-            </div>
-            <h2 className="mb-0" style={{ fontFamily: 'var(--font-heading)' }}>
-              {module?.title || `Module ${moduleId}`}
-            </h2>
-          </div>
-          {quizCompleted && (
-            <span className="ms-auto" style={{ color: 'var(--success)' }}>
-              <i className="fas fa-check-circle me-1"></i>
-              Completed
-            </span>
-          )}
+    <div style={{ width: '100%', maxWidth: '100%' }}>
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginBottom: '4px'
+        }}>
+          <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: 0 }}>
+            {module.title}
+          </h2>
         </div>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+          Test your knowledge
+        </p>
       </div>
 
-      <div className="mt-4">
-        <QuizComponent 
-          moduleId={parseInt(moduleId)} 
-          onComplete={handleQuizComplete}
-          quizCompleted={quizCompleted}
-          quizScore={quizScore}
-        />
-      </div>
+      <QuizComponent
+        moduleId={parseInt(moduleId)}
+        onComplete={(score) => {
+          storage.saveQuizScore(parseInt(moduleId), score);
+          setQuizScores(storage.getQuizScores());
+        }}
+        quizCompleted={quizScores[moduleId] !== null}
+        quizScore={quizScores[moduleId] || null}
+      />
     </div>
   );
 };
