@@ -50,3 +50,39 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+# Render
+render.yaml
+
+# Python
+*.pyc
+__pycache__/
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
