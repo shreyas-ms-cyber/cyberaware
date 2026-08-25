@@ -11,6 +11,7 @@ import Scenarios from './pages/Scenarios';
 import Progress from './pages/Progress';
 import Badges from './pages/Badges';
 import AICoach from './pages/AICoach';
+import AIQuizGenerator from './pages/AIQuizGenerator';
 import Certificate from './pages/Certificate';
 import Verify from './pages/Verify';
 import About from './pages/About';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/progress" element={<Progress />} />
           <Route path="/badges" element={<Badges />} />
           <Route path="/ai-coach" element={<AICoach />} />
+          <Route path="/ai-quiz" element={<AIQuizGenerator />} />
           <Route path="/certificate" element={<Certificate />} />
           <Route path="/verify/:id" element={<Verify />} />
           <Route path="/about" element={<About />} />

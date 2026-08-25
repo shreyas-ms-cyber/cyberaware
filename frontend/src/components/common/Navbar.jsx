@@ -5,14 +5,15 @@ const Navbar = ({ showBackButton = false }) => {
   const location = useLocation();
   
   const navItems = [
-    { path: '/', label: 'Home', icon: 'fa-house' },
+    { path: '/', label: 'Dashboard', icon: 'fa-house' },
     { path: '/learn', label: 'Learn', icon: 'fa-graduation-cap' },
-    { path: '/quiz', label: 'Quiz', icon: 'fa-question-circle' },
     { path: '/scenarios', label: 'Scenarios', icon: 'fa-shield-alt' },
+    { path: '/quiz', label: 'Quizzes', icon: 'fa-question-circle' },
+    { path: '/ai-quiz', label: 'AI Quiz', icon: 'fa-magic' },
     { path: '/progress', label: 'Progress', icon: 'fa-chart-line' },
     { path: '/badges', label: 'Badges', icon: 'fa-trophy' },
-    { path: '/certificate', label: 'Certificate', icon: 'fa-certificate' },
     { path: '/ai-coach', label: 'AI Coach', icon: 'fa-robot' },
+    { path: '/certificate', label: 'Certificate', icon: 'fa-certificate' },
     { path: '/about', label: 'About', icon: 'fa-info-circle' },
   ];
 
@@ -22,7 +23,7 @@ const Navbar = ({ showBackButton = false }) => {
     <nav className="navbar navbar-expand-lg" style={{ 
       background: 'rgba(8, 13, 24, 0.95)',
       backdropFilter: 'blur(10px)',
-      borderBottom: '1px solid var(--border)',
+      borderBottom: '1px solid var(--color-border)',
       padding: '0.75rem 0',
       position: 'sticky',
       top: 0,
@@ -33,23 +34,23 @@ const Navbar = ({ showBackButton = false }) => {
           {isBackButtonPage ? (
             <BackButton fallbackPath="/" />
           ) : (
-            <Link className="navbar-brand d-flex align-items-center" to="/" style={{ color: 'var(--text-primary)' }}>
+            <Link className="navbar-brand d-flex align-items-center" to="/" style={{ color: 'var(--color-text-primary)' }}>
               <span style={{ 
-                color: 'var(--accent)',
+                color: 'var(--color-accent)',
                 fontWeight: 800,
                 fontSize: '1.5rem',
-                fontFamily: 'var(--font-heading)'
+                fontFamily: 'var(--font-family-heading)'
               }}>
                 CyberAware
               </span>
               <span style={{ 
                 fontSize: '0.7rem',
-                color: 'var(--text-secondary)',
+                color: 'var(--color-text-muted)',
                 marginLeft: '0.5rem',
                 padding: '2px 8px',
-                border: '1px solid var(--border)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '4px',
-                background: 'var(--surface)'
+                background: 'var(--color-bg-surface)'
               }}>
                 v1.0
               </span>
@@ -57,7 +58,7 @@ const Navbar = ({ showBackButton = false }) => {
           )}
         </div>
         
-        <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{ color: 'var(--text-primary)' }}>
+        <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{ color: 'var(--color-text-primary)' }}>
           <i className="fas fa-bars" style={{ fontSize: '1.25rem' }}></i>
         </button>
         
@@ -74,9 +75,9 @@ const Navbar = ({ showBackButton = false }) => {
                       isActive ? 'active' : ''
                     }`}
                     style={{
-                      color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                      color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                       fontWeight: isActive ? '600' : '400',
-                      background: isActive ? 'rgba(0, 229, 255, 0.1)' : 'transparent',
+                      background: isActive ? 'var(--color-accent-soft)' : 'transparent',
                       transition: 'all 0.2s ease'
                     }}
                   >
