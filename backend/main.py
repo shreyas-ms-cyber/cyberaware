@@ -6,7 +6,7 @@ from app.config import Config
 from app.extensions import db, limiter
 
 print(f"Python version: {sys.version}")
-print(f"Python executable: {sys.executable}")
+print(f"Starting CyberAware Backend...")
 
 def create_app():
     app = Flask(__name__)
@@ -14,20 +14,23 @@ def create_app():
     
     print(f"Database URL: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
     
-    # Initialize extensions
-    CORS(app, origins=app.config.get('CORS_ORIGIN', '*'))
+    # Initialize CORS with explicit origins
+    cors_origin = app.config.get('CORS_ORIGIN', '*')
+    CORS(app, origins=cors_origin, supports_credentials=True)
+    print(f"CORS configured for: {cors_origin}")
     
+    # Initialize database
     try:
         db.init_app(app)
-        print("✅ Database initialized successfully")
+        with app.app_context():
+            db.create_all()
+            print("✅ Database initialized successfully")
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
-        # Continue without database for now
-        pass
     
     limiter.init_app(app)
     
-    # Import routes
+    # Register routes
     try:
         from app.routes import health, modules, quizzes, scenarios, certificates, chat, quiz_generate
         app.register_blueprint(health.bp)
@@ -37,7 +40,7 @@ def create_app():
         app.register_blueprint(certificates.bp)
         app.register_blueprint(chat.bp)
         app.register_blueprint(quiz_generate.bp)
-        print("✅ Routes registered successfully")
+        print("✅ All routes registered successfully")
     except ImportError as e:
         print(f"⚠️ Warning: Could not import routes: {e}")
     
@@ -46,20 +49,14 @@ def create_app():
     def not_found(error):
         return jsonify({
             'success': False,
-            'error': {
-                'message': 'Resource not found',
-                'code': 'NOT_FOUND'
-            }
+            'error': {'message': 'Resource not found', 'code': 'NOT_FOUND'}
         }), 404
     
     @app.errorhandler(500)
     def internal_error(error):
         return jsonify({
             'success': False,
-            'error': {
-                'message': 'Internal server error',
-                'code': 'INTERNAL_ERROR'
-            }
+            'error': {'message': 'Internal server error', 'code': 'INTERNAL_ERROR'}
         }), 500
     
     return app
@@ -72,7 +69,6 @@ def index():
         'service': 'CyberAware API',
         'version': '1.0.0',
         'status': 'running',
-        'python_version': sys.version,
         'endpoints': {
             'health': '/api/health',
             'modules': '/api/modules',
@@ -88,6 +84,10 @@ def index():
         }
     })
 
+@app.route('/api/test')
+def test():
+    return jsonify({'status': 'ok', 'message': 'API is working'})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=False)

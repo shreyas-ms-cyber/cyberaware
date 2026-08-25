@@ -8,12 +8,16 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///cyberaware.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Gemini AI (Primary)
+    # Gemini AI
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
     
-    # CORS
+    # CORS - Allow multiple origins
     CORS_ORIGIN = os.getenv('CORS_ORIGIN', '*')
+    if CORS_ORIGIN == '*':
+        CORS_ORIGINS = ['*']
+    else:
+        CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGIN.split(',')]
     
     # Flask
     FLASK_ENV = os.getenv('FLASK_ENV', 'production')
