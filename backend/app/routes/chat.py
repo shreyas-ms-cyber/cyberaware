@@ -37,8 +37,8 @@ def chat():
             }), 400
         
         # Sanitize message
-        message = re.sub(r'<[^>]*>', '', message)  # Remove HTML tags
-        message = message[:500]  # Limit length
+        message = re.sub(r'<[^>]*>', '', message)
+        message = message[:500]
         
         # Log chat analytics
         analytics = ChatAnalytics(

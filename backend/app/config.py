@@ -4,20 +4,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    # Database
+    # Database - using psycopg3 driver
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///cyberaware.db')
+    # Convert postgresql:// to postgresql+psycopg:// for psycopg3
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgresql://'):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgresql://', 'postgresql+psycopg://')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Gemini AI
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
     
-    # CORS - Allow multiple origins
+    # CORS
     CORS_ORIGIN = os.getenv('CORS_ORIGIN', '*')
-    if CORS_ORIGIN == '*':
-        CORS_ORIGINS = ['*']
-    else:
-        CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGIN.split(',')]
     
     # Flask
     FLASK_ENV = os.getenv('FLASK_ENV', 'production')

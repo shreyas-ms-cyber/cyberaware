@@ -1,4 +1,3 @@
-cat > seed_complete.py << 'EOF'
 """
 CyberAware - Complete Database Seeder
 Seeds 150+ modules, 100+ scenarios, 100+ quizzes
@@ -7,7 +6,12 @@ Idempotent and chunked for performance
 
 import json
 import sys
-from app import create_app
+import os
+
+# Add current directory to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from main import create_app
 from app.extensions import db
 from app.models import TrainingModule, QuizQuestion, Scenario
 
@@ -89,4 +93,3 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
         sys.exit(1)
-EOF

@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from app.config import Config
 
@@ -18,7 +19,6 @@ class AIService:
                 "error": "API key not configured. Please set GEMINI_API_KEY in environment variables."
             }
         
-        # System prompt with cybersecurity focus
         system_prompt = """You are CyberBuddy, a cybersecurity awareness assistant. Your role is to help users learn about cybersecurity in a friendly, educational way.
 
 KEY RULES:
@@ -93,7 +93,7 @@ KEY RULES:
             }
 
     def generate_quiz(self, topic, difficulty="intermediate", question_count=5):
-        """Generate a quiz using Google Gemini API"""
+        """Generate a quiz using Google Gemini API with validation"""
         
         if not self.api_key:
             return {
@@ -101,7 +101,7 @@ KEY RULES:
                 "error": "API key not configured"
             }
 
-        prompt = f"""Generate a {difficulty} level cybersecurity quiz about {topic} with exactly {question_count} questions.
+        prompt = f"""Generate a {difficulty} level cybersecurity quiz about "{topic}" with exactly {question_count} questions.
 
 IMPORTANT RULES:
 1. Return ONLY valid JSON
@@ -109,6 +109,7 @@ IMPORTANT RULES:
 3. Include the correct answer as one of the options
 4. Include a brief explanation for why the answer is correct
 5. Make questions educational and practical
+6. Questions should be appropriate for {difficulty} level
 
 Output format (JSON only, no other text):
 {{
@@ -144,14 +145,28 @@ Output format (JSON only, no other text):
                 if "candidates" in data and len(data["candidates"]) > 0:
                     content = data["candidates"][0]["content"]["parts"][0]["text"]
                     
+                    # Parse and validate JSON
                     try:
-                        import re
                         json_match = re.search(r'\{[\s\S]*\}', content)
                         if json_match:
                             quiz_data = json.loads(json_match.group())
+                            questions = quiz_data.get("questions", [])
+                            
+                            # Validate questions
+                            validated_questions = []
+                            for q in questions:
+                                if self._validate_question(q):
+                                    validated_questions.append(q)
+                            
+                            if len(validated_questions) == 0:
+                                return {
+                                    "success": False,
+                                    "error": "No valid questions generated"
+                                }
+                            
                             return {
                                 "success": True,
-                                "data": quiz_data.get("questions", [])
+                                "data": validated_questions
                             }
                         else:
                             return {
@@ -179,3 +194,28 @@ Output format (JSON only, no other text):
                 "success": False,
                 "error": f"Error: {str(e)}"
             }
+
+    def _validate_question(self, question):
+        """Validate a single question has all required fields"""
+        required_fields = ['question', 'options', 'correct_answer', 'explanation']
+        
+        # Check all fields exist
+        for field in required_fields:
+            if field not in question:
+                return False
+        
+        # Check options is a list of 4
+        if not isinstance(question['options'], list) or len(question['options']) != 4:
+            return False
+        
+        # Check correct_answer is in options
+        if question['correct_answer'] not in question['options']:
+            return False
+        
+        # Check fields are not empty
+        if not question['question'].strip():
+            return False
+        if not question['explanation'].strip():
+            return False
+        
+        return True

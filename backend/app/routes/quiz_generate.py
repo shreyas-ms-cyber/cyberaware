@@ -1,7 +1,9 @@
 from flask import Blueprint, jsonify, request
 from app.extensions import db, limiter
+from app.services.ai_service import AIService
 
 bp = Blueprint('quiz_generate', __name__, url_prefix='/api')
+ai_service = AIService()
 
 @bp.route('/quiz/generate', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -23,12 +25,24 @@ def generate_quiz():
         difficulty = data.get('difficulty', 'intermediate')
         question_count = data.get('question_count', 5)
         
+        # Validate topic
         if not topic:
             return jsonify({
                 'success': False,
                 'error': {
                     'message': 'Topic is required',
                     'code': 'MISSING_TOPIC'
+                }
+            }), 400
+        
+        # Validate difficulty
+        valid_difficulties = ['beginner', 'intermediate', 'advanced']
+        if difficulty not in valid_difficulties:
+            return jsonify({
+                'success': False,
+                'error': {
+                    'message': f'Difficulty must be one of: {", ".join(valid_difficulties)}',
+                    'code': 'INVALID_DIFFICULTY'
                 }
             }), 400
         
@@ -42,17 +56,27 @@ def generate_quiz():
                 }
             }), 400
         
-        # For now, return a placeholder response
-        # AI quiz generation will be added in Phase 12
-        return jsonify({
-            'success': True,
-            'data': {
-                'message': 'AI Quiz Generator is coming soon!',
-                'topic': topic,
-                'difficulty': difficulty,
-                'question_count': question_count
-            }
-        })
+        # Generate quiz
+        result = ai_service.generate_quiz(topic, difficulty, question_count)
+        
+        if result.get('success'):
+            return jsonify({
+                'success': True,
+                'data': {
+                    'topic': topic,
+                    'difficulty': difficulty,
+                    'questions': result['data'],
+                    'count': len(result['data'])
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': {
+                    'message': result.get('error', 'Failed to generate quiz'),
+                    'code': 'GENERATION_ERROR'
+                }
+            }), 503
         
     except Exception as e:
         return jsonify({
