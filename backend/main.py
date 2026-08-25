@@ -1,6 +1,5 @@
 import os
-import sys
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, limiter
@@ -14,7 +13,7 @@ def create_app():
     db.init_app(app)
     limiter.init_app(app)
     
-    # Import and register all routes
+    # Import routes
     try:
         from app.routes import health, modules, quizzes, scenarios, certificates, chat, quiz_generate
         app.register_blueprint(health.bp)
@@ -38,16 +37,6 @@ def create_app():
             }
         }), 404
     
-    @app.errorhandler(405)
-    def method_not_allowed(error):
-        return jsonify({
-            'success': False,
-            'error': {
-                'message': 'Method not allowed',
-                'code': 'METHOD_NOT_ALLOWED'
-            }
-        }), 405
-    
     @app.errorhandler(500)
     def internal_error(error):
         return jsonify({
@@ -60,7 +49,6 @@ def create_app():
     
     return app
 
-# Create app instance
 app = create_app()
 
 @app.route('/')
@@ -85,4 +73,5 @@ def index():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

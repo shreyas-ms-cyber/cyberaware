@@ -8,15 +8,19 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///cyberaware.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Gemini AI
+    # Groq AI
+    GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+    GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
+    
+    # Gemini AI (fallback)
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash')
     
     # CORS
-    CORS_ORIGIN = os.getenv('CORS_ORIGIN', 'http://localhost:8081')
+    CORS_ORIGIN = os.getenv('CORS_ORIGIN', '*')
     
     # Flask
-    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+    FLASK_ENV = os.getenv('FLASK_ENV', 'production')
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Rate Limiting
