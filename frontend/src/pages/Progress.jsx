@@ -1,58 +1,61 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../services/api';
 import { storage } from '../services/storage';
-import { getDashboardStats, getModulePerformance } from '../utils/score';
+import { getDashboardStats } from '../utils/score';
 import { getUnlockedBadges } from '../utils/badges';
-import { MODULES } from '../utils/constants';
-import ResetProgress from '../components/common/ResetProgress';
 
 const Progress = () => {
   const [stats, setStats] = useState(null);
-  const [unlockedBadges, setUnlockedBadges] = useState([]);
+  const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [unlockedBadges, setUnlockedBadges] = useState([]);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
-    const dashboardStats = getDashboardStats();
-    setStats(dashboardStats);
-    setUnlockedBadges(getUnlockedBadges());
-    setLoading(false);
-  };
-
-  const getModuleTitle = (id) => {
-    const mod = MODULES.find(m => m.id === id);
-    return mod ? mod.title : `Module ${id}`;
+    try {
+      const dashboardStats = getDashboardStats();
+      setStats(dashboardStats);
+      setUnlockedBadges(getUnlockedBadges());
+      
+      // Fetch all modules from API
+      const response = await api.getModules(200, 0);
+      if (response.success) {
+        setModules(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading progress data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center py-5">
-          <div className="spinner-border text-accent" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <div className="spinner-border text-accent" role="status">
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
   }
 
-  // If no progress yet
   if (!stats || !stats.hasStarted) {
     return (
       <div className="container py-5">
         <div className="text-center py-5">
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
-            <i className="fas fa-chart-line" style={{ color: 'var(--text-secondary)' }}></i>
+            <i className="fas fa-chart-line" style={{ color: 'var(--color-text-secondary)' }}></i>
           </div>
           <h3>No Progress Yet</h3>
           <p className="text-secondary">Start your cybersecurity training to track your progress.</p>
           <Link to="/learn" className="btn btn-lg mt-3" style={{
-            background: 'var(--accent)',
-            color: 'var(--bg-primary)',
+            background: 'var(--color-accent)',
+            color: 'var(--color-bg-primary)',
             fontWeight: 600,
             borderRadius: 'var(--radius-md)'
           }}>
@@ -63,231 +66,127 @@ const Progress = () => {
     );
   }
 
+  const totalModules = modules.length || 0;
+
   return (
-    <div className="container px-3 py-3">
-      {/* Header */}
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div className="container px-3 py-3" style={{ width: '100%', maxWidth: '100%' }}>
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h2 className="mb-0" style={{ 
           fontFamily: 'var(--font-heading)', 
           fontSize: '1.25rem',
-          color: 'var(--text-primary)'
+          color: 'var(--color-text-primary)'
         }}>
-          <i className="fas fa-chart-line me-2" style={{ color: 'var(--accent)' }}></i>
+          <i className="fas fa-chart-line me-2" style={{ color: 'var(--color-accent)' }}></i>
           Progress Dashboard
         </h2>
-        <ResetProgress />
       </div>
 
-      {/* Stats Grid - 2x2 on mobile */}
-      <div className="row g-2 mb-4">
+      <div className="row g-2 mb-3">
         <div className="col-6">
-          <div className="p-3 rounded-lg text-center" style={{ background: 'var(--surface)' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent)' }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'var(--color-bg-surface)' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-accent)' }}>
               {stats.progress}%
             </div>
-            <div className="text-secondary" style={{ fontSize: '0.75rem' }}>Progress</div>
-            <div className="mt-1" style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-              {stats.completedCount}/{stats.totalModules}
+            <div className="text-secondary" style={{ fontSize: '0.65rem' }}>Progress</div>
+            <div className="mt-1" style={{ fontSize: '0.55rem', color: 'var(--color-text-muted)' }}>
+              {stats.completedCount}/{totalModules}
             </div>
           </div>
         </div>
         <div className="col-6">
-          <div className="p-3 rounded-lg text-center" style={{ background: 'var(--surface)' }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'var(--color-bg-surface)' }}>
             <div style={{ 
-              fontSize: '1.75rem', 
+              fontSize: '1.5rem', 
               fontWeight: 700, 
               color: stats.overallScore >= 70 ? 'var(--success)' : 'var(--warning)' 
             }}>
               {stats.overallScore !== null ? `${stats.overallScore}%` : '—'}
             </div>
-            <div className="text-secondary" style={{ fontSize: '0.75rem' }}>Awareness Score</div>
+            <div className="text-secondary" style={{ fontSize: '0.65rem' }}>Awareness Score</div>
             {stats.scoreBand && (
-              <div className="mt-1" style={{ fontSize: '0.65rem', color: stats.scoreBand.color }}>
+              <div className="mt-1" style={{ fontSize: '0.55rem', color: stats.scoreBand.color }}>
                 {stats.scoreBand.label}
               </div>
             )}
           </div>
         </div>
         <div className="col-6">
-          <div className="p-3 rounded-lg text-center" style={{ background: 'var(--surface)' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--warning)' }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'var(--color-bg-surface)' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--warning)' }}>
               {stats.badgesCount}
             </div>
-            <div className="text-secondary" style={{ fontSize: '0.75rem' }}>Badges</div>
+            <div className="text-secondary" style={{ fontSize: '0.65rem' }}>Badges</div>
           </div>
         </div>
         <div className="col-6">
-          <div className="p-3 rounded-lg text-center" style={{ background: 'var(--surface)' }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'var(--color-bg-surface)' }}>
             <div style={{ 
-              fontSize: '1.75rem', 
+              fontSize: '1.5rem', 
               fontWeight: 700, 
               color: stats.avgQuizScore >= 70 ? 'var(--success)' : 'var(--warning)' 
             }}>
               {stats.avgQuizScore}%
             </div>
-            <div className="text-secondary" style={{ fontSize: '0.75rem' }}>Avg Quiz</div>
+            <div className="text-secondary" style={{ fontSize: '0.65rem' }}>Avg Quiz</div>
           </div>
         </div>
       </div>
 
-      {/* Recommended Next Module */}
-      {stats.recommendedModule && (
-        <div className="mb-4 p-3 rounded-lg" style={{ 
-          background: 'rgba(0, 229, 255, 0.05)',
-          border: '1px solid rgba(0, 229, 255, 0.2)'
-        }}>
-          <div className="d-flex align-items-center justify-content-between">
-            <div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
-                <i className="fas fa-lightbulb me-1" style={{ color: 'var(--accent)' }}></i>
-                Recommended Next
-              </div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {getModuleTitle(stats.recommendedModule)}
-              </div>
-            </div>
-            <Link to={`/module/${stats.recommendedModule}`} className="btn btn-sm" style={{
-              background: 'var(--accent)',
-              color: 'var(--bg-primary)',
-              fontWeight: 600,
-              border: 'none',
-              padding: '6px 14px',
-              fontSize: '0.8rem'
-            }}>
-              Start <i className="fas fa-arrow-right ms-1"></i>
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Weak Areas */}
-      {stats.weakAreas && stats.weakAreas.length > 0 && (
-        <div className="mb-3">
-          <div className="text-secondary mb-2" style={{ fontSize: '0.8rem' }}>
-            <i className="fas fa-exclamation-triangle me-1" style={{ color: 'var(--danger)' }}></i>
-            Areas to Improve
-          </div>
-          <div className="d-flex flex-wrap gap-1">
-            {stats.weakAreas.map(area => (
-              <Link key={area.moduleId} to={`/module/${area.moduleId}`} className="text-decoration-none">
-                <span className="px-2 py-1 rounded-sm" style={{
-                  background: 'rgba(255, 59, 92, 0.1)',
-                  border: '1px solid rgba(255, 59, 92, 0.2)',
-                  color: 'var(--danger)',
-                  fontSize: '0.7rem',
-                  display: 'inline-block'
-                }}>
-                  {getModuleTitle(area.moduleId)} - {area.score}%
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Strong Areas */}
-      {stats.strongAreas && stats.strongAreas.length > 0 && (
-        <div className="mb-3">
-          <div className="text-secondary mb-2" style={{ fontSize: '0.8rem' }}>
-            <i className="fas fa-star me-1" style={{ color: 'var(--success)' }}></i>
-            Strong Areas
-          </div>
-          <div className="d-flex flex-wrap gap-1">
-            {stats.strongAreas.map(area => (
-              <span key={area.moduleId} className="px-2 py-1 rounded-sm" style={{
-                background: 'rgba(0, 210, 106, 0.1)',
-                border: '1px solid rgba(0, 210, 106, 0.2)',
-                color: 'var(--success)',
-                fontSize: '0.7rem',
-                display: 'inline-block'
-              }}>
-                {getModuleTitle(area.moduleId)} - {area.score}%
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Badges */}
-      {unlockedBadges.length > 0 && (
-        <div className="mb-3">
-          <div className="text-secondary mb-2" style={{ fontSize: '0.8rem' }}>
-            <i className="fas fa-trophy me-1" style={{ color: 'var(--warning)' }}></i>
-            Your Badges ({unlockedBadges.length})
-          </div>
-          <div className="d-flex flex-wrap gap-1">
-            {unlockedBadges.map(badge => (
-              <div key={badge.id} className="d-flex align-items-center gap-1 px-2 py-1 rounded-sm" style={{
-                background: 'rgba(255, 200, 87, 0.1)',
-                border: '1px solid rgba(255, 200, 87, 0.2)',
-                fontSize: '0.7rem'
-              }}>
-                <i className={`fas ${badge.icon}`} style={{ color: 'var(--warning)', fontSize: '0.7rem' }}></i>
-                <span style={{ color: 'var(--text-primary)' }}>{badge.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Module Progress List */}
-      <div className="mt-4">
-        <div className="text-secondary mb-2" style={{ fontSize: '0.8rem' }}>
+      <div className="mt-3">
+        <div className="text-secondary mb-1" style={{ fontSize: '0.7rem' }}>
           <i className="fas fa-list me-1"></i>
-          Module Progress
+          Module Progress ({totalModules} total)
         </div>
-        {MODULES.map(module => {
+        {modules.map(module => {
           const quizScores = storage.getQuizScores();
-          const score = quizScores[module.id];
+          const score = quizScores[module.id] || 0;
           const isCompleted = storage.isModuleComplete(module.id);
           
           return (
             <Link key={module.id} to={`/module/${module.id}`} className="text-decoration-none">
               <div className="p-2 mb-1 rounded-sm d-flex justify-content-between align-items-center" style={{
-                background: 'var(--surface)',
-                border: isCompleted ? '1px solid rgba(0, 210, 106, 0.3)' : '1px solid var(--border)'
+                background: 'var(--color-bg-surface)',
+                border: isCompleted ? '1px solid rgba(0, 210, 106, 0.3)' : '1px solid var(--color-border)'
               }}>
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '24px',
+                    height: '24px',
                     borderRadius: '50%',
                     background: isCompleted ? 'rgba(0, 210, 106, 0.2)' : 'rgba(0, 229, 255, 0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isCompleted ? 'var(--success)' : 'var(--accent)',
-                    fontSize: '0.7rem'
+                    color: isCompleted ? 'var(--success)' : 'var(--color-accent)',
+                    fontSize: '0.6rem',
+                    flexShrink: 0
                   }}>
-                    <i className={`fas ${module.icon}`}></i>
+                    <i className="fas fa-check"></i>
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {module.title}
-                    </div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>
-                      Module {module.id}
                     </div>
                   </div>
                 </div>
-                <div>
-                  {score !== null && (
+                <div style={{ flexShrink: 0 }}>
+                  {score > 0 && (
                     <span style={{ 
-                      fontSize: '0.7rem', 
+                      fontSize: '0.65rem', 
                       color: score >= 70 ? 'var(--success)' : 'var(--warning)',
                       fontWeight: 600
                     }}>
                       {score}%
                     </span>
                   )}
-                  {isCompleted && score === null && (
-                    <span style={{ fontSize: '0.7rem', color: 'var(--success)' }}>
+                  {isCompleted && score === 0 && (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--success)' }}>
                       <i className="fas fa-check-circle"></i>
                     </span>
                   )}
-                  {!isCompleted && score === null && (
-                    <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>
-                      Not started
+                  {!isCompleted && score === 0 && (
+                    <span style={{ fontSize: '0.55rem', color: 'var(--color-text-muted)' }}>
+                      Start
                     </span>
                   )}
                 </div>

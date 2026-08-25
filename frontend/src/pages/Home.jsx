@@ -1,26 +1,46 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { storage } from '../services/storage';
+import { api } from '../services/api';
 import { calculateOverallScore, getScoreBand, getModulePerformance, getDashboardStats } from '../utils/score';
 import { getUnlockedBadges } from '../utils/badges';
 import CyberBuddyAvatar from '../components/ui/CyberBuddyAvatar';
 import StatCard from '../components/ui/StatCard';
-import ProgressBar from '../components/ui/ProgressBar';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Home = () => {
   const [stats, setStats] = useState(null);
+  const [totalModules, setTotalModules] = useState(0);
   const [recentActivity, setRecentActivity] = useState([]);
   const [performance, setPerformance] = useState({ labels: [], scores: [] });
-  const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const dashboardStats = getDashboardStats();
-    setStats(dashboardStats);
-    setRecentActivity(storage.getActivity().slice(0, 5));
-    setPerformance(getModulePerformance());
-    import('../utils/constants').then(({ MODULES }) => setModules(MODULES));
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const dashboardStats = getDashboardStats();
+      setStats(dashboardStats);
+      setRecentActivity(storage.getActivity().slice(0, 5));
+      setPerformance(getModulePerformance());
+      
+      // Fetch total modules count from API
+      const response = await api.getModules(200, 0);
+      if (response.success) {
+        setTotalModules(response.total || response.data.length || 184);
+      } else {
+        setTotalModules(184); // fallback
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      setTotalModules(184);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const overallScore = stats?.overallScore;
   const scoreBand = stats?.scoreBand;
@@ -30,8 +50,18 @@ const Home = () => {
     score: performance.scores[i] || 0,
   }));
 
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <div className="spinner-border text-accent" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ width: '100%', maxWidth: '100%', paddingBottom: '4px' }}>
+    <div style={{ width: '100%', maxWidth: '100%' }}>
       {/* Greeting */}
       <div style={{ marginBottom: '20px' }}>
         <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>Welcome back!</p>
@@ -39,7 +69,7 @@ const Home = () => {
         <p style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--color-accent)' }}>Stay secure. 👋</p>
       </div>
 
-      {/* Stats Grid - 2 columns */}
+      {/* Stats Grid - 2 columns with real totals */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -48,7 +78,7 @@ const Home = () => {
       }}>
         <StatCard
           label="Modules"
-          value={`${stats?.completedCount || 0}/${stats?.totalModules || 10}`}
+          value={`${stats?.completedCount || 0}/${totalModules}`}
           sublabel={`${stats?.progress || 0}%`}
           color="cyan"
           icon="fa-book"
@@ -111,42 +141,6 @@ const Home = () => {
               Complete modules to see progress
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Topic Progress */}
-      <div style={{
-        background: 'var(--color-bg-card)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '16px',
-        border: '1px solid var(--color-border)',
-        marginBottom: '16px'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px'
-        }}>
-          <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 600, margin: 0 }}>Topic Progress</h4>
-          <Link to="/progress" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-accent)', textDecoration: 'none' }}>
-            View All
-          </Link>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {modules.slice(0, 4).map((mod) => {
-            const score = storage.getQuizScore(mod.id) || 0;
-            return (
-              <ProgressBar
-                key={mod.id}
-                value={score}
-                max={100}
-                label={mod.title}
-                color={score >= 70 ? 'green' : 'amber'}
-                size="sm"
-              />
-            );
-          })}
         </div>
       </div>
 
