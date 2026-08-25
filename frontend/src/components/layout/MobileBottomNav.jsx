@@ -43,6 +43,12 @@ const MobileBottomNav = () => {
 
   const isMoreActive = moreItems.some(item => location.pathname === item.path);
 
+  const handleMoreClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowMore(!showMore);
+  };
+
   return (
     <nav style={{
       position: 'fixed',
@@ -62,14 +68,57 @@ const MobileBottomNav = () => {
     }} ref={moreRef}>
       {mainItems.map(item => {
         const active = item.path === '/more' ? isMoreActive : isActive(item.path);
+        
+        // More button - special handling
+        if (item.path === '/more') {
+          return (
+            <button
+              key={item.path}
+              onClick={handleMoreClick}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'none',
+                border: 'none',
+                color: active || showMore ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                fontSize: '9px',
+                padding: '4px 8px',
+                minWidth: '48px',
+                minHeight: '56px',
+                borderRadius: 'var(--radius-sm)',
+                background: active || showMore ? 'var(--color-accent-soft)' : 'transparent',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                cursor: 'pointer',
+                touchAction: 'manipulation'
+              }}
+            >
+              <i className={`fas ${item.icon}`} style={{ fontSize: '20px', marginBottom: '2px' }}></i>
+              <span style={{ fontSize: '9px', fontWeight: (active || showMore) ? 600 : 400 }}>{item.label}</span>
+              {(active || showMore) && (
+                <span style={{
+                  position: 'absolute',
+                  top: -1,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '20px',
+                  height: '3px',
+                  background: 'var(--color-accent)',
+                  borderRadius: '2px'
+                }} />
+              )}
+            </button>
+          );
+        }
+
+        // Regular navigation items - direct Link with no wrapper
         return (
           <Link
             key={item.path}
             to={item.path}
-            onClick={() => {
-              if (item.path === '/more') setShowMore(!showMore);
-              else setShowMore(false);
-            }}
+            onClick={() => setShowMore(false)}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -84,7 +133,9 @@ const MobileBottomNav = () => {
               borderRadius: 'var(--radius-sm)',
               background: active ? 'var(--color-accent-soft)' : 'transparent',
               transition: 'all 0.2s ease',
-              position: 'relative'
+              position: 'relative',
+              touchAction: 'manipulation',
+              cursor: 'pointer'
             }}
           >
             <i className={`fas ${item.icon}`} style={{ fontSize: '20px', marginBottom: '2px' }}></i>
@@ -139,7 +190,9 @@ const MobileBottomNav = () => {
                   textDecoration: 'none',
                   fontSize: '9px',
                   minWidth: '56px',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  touchAction: 'manipulation',
+                  cursor: 'pointer'
                 }}
               >
                 <i className={`fas ${item.icon}`} style={{ fontSize: '18px', marginBottom: '2px' }}></i>
