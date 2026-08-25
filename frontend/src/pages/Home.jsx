@@ -4,8 +4,6 @@ import { storage } from '../services/storage';
 import { calculateOverallScore, getScoreBand, getModulePerformance, getDashboardStats } from '../utils/score';
 import { getUnlockedBadges } from '../utils/badges';
 import CyberBuddyAvatar from '../components/ui/CyberBuddyAvatar';
-import StatCard from '../components/ui/StatCard';
-import ProgressBar from '../components/ui/ProgressBar';
 import { Line } from 'recharts';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -32,136 +30,137 @@ const Home = () => {
   }));
 
   return (
-    <div>
-      {/* Welcome */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+    <div className="w-full max-w-4xl mx-auto px-4 py-4 pb-20 bg-slate-950 text-white">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-4">
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-            Welcome back 👋
-          </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Stay smart. Stay secure.</p>
+          <h1 className="text-xl font-bold text-white">CyberAware</h1>
+          <p className="text-xs text-slate-400">Stay Aware. Stay Secure.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer' }}>
-            <i className="fas fa-search"></i>
-          </button>
-          <button style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-            <i className="fas fa-moon"></i>
-          </button>
+        <button className="text-slate-400 hover:text-white transition-colors">
+          <i className="fas fa-bell text-lg"></i>
+        </button>
+      </div>
+
+      {/* Greeting */}
+      <div className="mb-6">
+        <p className="text-sm text-slate-400">Welcome back!</p>
+        <p className="text-lg font-bold text-white">Stay smart.</p>
+        <p className="text-lg font-bold text-sky-400">Stay secure. 👋</p>
+      </div>
+
+      {/* Stats Grid (2x2) */}
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Modules */}
+        <div className="flex flex-row items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-sm">
+            <i className="fas fa-book"></i>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Modules</p>
+            <p className="text-base font-bold text-white">{stats?.completedCount || 0}/{stats?.totalModules || 10}</p>
+            <p className="text-xs font-semibold text-cyan-400">{stats?.progress || 0}%</p>
+          </div>
+        </div>
+
+        {/* Quizzes */}
+        <div className="flex flex-row items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm">
+            <i className="fas fa-question-circle"></i>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Quizzes</p>
+            <p className="text-base font-bold text-white">{Object.keys(storage.getQuizScores()).length}</p>
+            <p className="text-xs font-semibold text-purple-400">{stats?.avgQuizScore || 0}%</p>
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="flex flex-row items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-sm">
+            <i className="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Score</p>
+            <p className="text-base font-bold text-white">{overallScore !== null ? `${overallScore}` : '—'}</p>
+            <p className="text-xs font-semibold text-amber-400">{scoreBand?.label || 'Not started'}</p>
+          </div>
+        </div>
+
+        {/* Badges */}
+        <div className="flex flex-row items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-sm">
+            <i className="fas fa-trophy"></i>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Badges</p>
+            <p className="text-base font-bold text-white">{stats?.badgesCount || 0}</p>
+            <p className="text-xs font-semibold text-orange-400">Keep going!</p>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <StatCard label="Modules Completed" value={`${stats?.completedCount || 0}/${stats?.totalModules || 10}`} sublabel={`${stats?.progress || 0}% Complete`} color="var(--accent)" icon="fa-book" />
-        <StatCard label="Quizzes Completed" value={stats?.avgQuizScore ? `${stats.avgQuizScore}%` : '—'} sublabel="Avg. Score" color="var(--success)" icon="fa-question-circle" />
-        <StatCard label="Awareness Score" value={overallScore !== null ? `${overallScore}%` : '—'} sublabel={scoreBand?.label || 'Not started'} color={overallScore >= 70 ? 'var(--success)' : 'var(--warning)'} icon="fa-shield-alt" />
-        <StatCard label="Badges Earned" value={stats?.badgesCount || 0} sublabel="Keep going!" color="var(--warning)" icon="fa-trophy" />
-      </div>
-
-      {/* Chart + Topic Progress */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '24px' }}>
-        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: '20px', border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Your Progress</h3>
-          <div style={{ height: '200px' }}>
+      {/* Progress Cards (Vertical Stack) */}
+      <div className="flex flex-col gap-4 w-full mb-6">
+        {/* Your Progress */}
+        <div className="w-full p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-semibold text-white">Your Progress</h3>
+            <span className="text-xs text-slate-400">Last 30 Days ▼</span>
+          </div>
+          <div className="h-40 w-full">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid stroke="rgba(255,255,255,0.04)" />
-                  <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
-                  <Line type="monotone" dataKey="score" stroke="#00E5FF" strokeWidth={2} dot={{ fill: '#00E5FF', r: 4 }} activeDot={{ r: 6 }} />
+                  <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                  <Tooltip contentStyle={{ background: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                  <Line type="monotone" dataKey="score" stroke="#38bdf8" strokeWidth={2} dot={{ fill: '#38bdf8', r: 4 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
-                Complete modules to see progress
+              <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                Complete a module to see progress
               </div>
             )}
           </div>
         </div>
-        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: '20px', border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Topic Progress</h3>
-          {modules.slice(0, 5).map((mod) => {
-            const score = storage.getQuizScore(mod.id) || 0;
-            return (
-              <ProgressBar
-                key={mod.id}
-                value={score}
-                max={100}
-                label={mod.title}
-                color={score >= 70 ? 'var(--success)' : 'var(--warning)'}
-                style={{ marginBottom: '8px' }}
-              />
-            );
-          })}
-          <Link to="/progress" style={{ fontSize: '13px', color: 'var(--accent)', textDecoration: 'none', marginTop: '8px', display: 'inline-block' }}>View All Topics →</Link>
-        </div>
-      </div>
 
-      {/* Recent Activity + CyberBuddy */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: '20px', border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>Recent Activity</h3>
-          {recentActivity.length > 0 ? (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {recentActivity.map((act, i) => (
-                <li key={i} style={{ padding: '10px 0', borderBottom: '1px solid var(--border-light)', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>
-                    <i className="fas fa-circle" style={{ fontSize: '6px', color: 'var(--accent)', marginRight: '8px', verticalAlign: 'middle' }} />
-                    {act.type === 'module_completed' && `Completed ${act.moduleTitle}`}
-                    {act.type === 'quiz_completed' && `Quiz: ${act.moduleTitle} – ${act.score}%`}
-                    {act.type === 'badge_unlocked' && `Unlocked ${act.badge}`}
-                    {act.type === 'scenario_completed' && `Scenario: ${act.moduleTitle}`}
-                  </span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>+{act.score || 50}XP</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div style={{ color: 'var(--text-muted)' }}>No activity yet</div>
-          )}
-          <Link to="/progress" style={{ fontSize: '13px', color: 'var(--accent)', textDecoration: 'none', marginTop: '12px', display: 'inline-block' }}>View All Activity →</Link>
-        </div>
-        <div style={{
-          background: 'linear-gradient(135deg, var(--bg-surface), var(--bg-surface-elevated))',
-          borderRadius: 'var(--radius-md)',
-          padding: '24px',
-          border: '1px solid var(--border)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          <CyberBuddyAvatar size="lg" />
-          <h4 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', margin: '16px 0 4px' }}>CyberBuddy AI</h4>
-          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>Your AI cybersecurity assistant</p>
-          <Link to="/ai-coach" style={{
-            padding: '10px 28px',
-            borderRadius: 'var(--radius-sm)',
-            background: 'var(--accent)',
-            color: 'var(--bg-primary)',
-            fontWeight: 600,
-            fontSize: '14px',
-            textDecoration: 'none',
-            transition: 'all 0.2s ease'
-          }}>
-            Chat with CyberBuddy
-          </Link>
-          <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-            Ask me anything about cybersecurity
+        {/* Topic Progress */}
+        <div className="w-full p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-sm font-semibold text-white">Topic Progress</h3>
+            <Link to="/progress" className="text-xs text-sky-400 hover:underline">View All</Link>
+          </div>
+          <div className="space-y-3">
+            {modules.slice(0, 4).map((mod) => {
+              const score = storage.getQuizScore(mod.id) || 0;
+              const color = score >= 70 ? 'bg-emerald-500' : 'bg-amber-500';
+              return (
+                <div key={mod.id}>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-300">{mod.title}</span>
+                    <span className="text-slate-400">{score}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden mt-1">
+                    <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${score}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Security Tip */}
-      <div style={{ marginTop: '24px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: '16px 20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <i className="fas fa-shield-alt" style={{ color: 'var(--accent)', fontSize: '20px' }} />
-        <div>
-          <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-primary)' }}>Security Tip of the Day</div>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Always verify the sender's email address before clicking on any links or attachments.</div>
-        </div>
+      {/* Quick Actions + CyberBuddy (optional) - keep as is or adapt */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link to="/learn" className="flex items-center justify-center gap-2 p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 text-sm font-medium hover:bg-sky-500/20 transition-colors">
+          <i className="fas fa-graduation-cap"></i> Continue
+        </Link>
+        <Link to="/ai-coach" className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-medium hover:bg-slate-700 transition-colors">
+          <i className="fas fa-robot"></i> CyberBuddy
+        </Link>
       </div>
     </div>
   );
